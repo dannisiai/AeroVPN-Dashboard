@@ -12,7 +12,7 @@ const faqItems = [
   { question: "电脑端启动出现 xxx.dll 错误？", answer: "若启动时提示缺少 .dll 文件，说明系统可能缺少微软 VC++ 运行库。安装运行库并重启软件后再试。" },
   { question: "Mac 系统出现软件闪退？", answer: "首次打开时请在“隐私与安全性”中授予信任。软件启动后图标位于屏幕顶部导航栏。如遇闪退，请尝试重启电脑或重新安装客户端。" },
   { question: "关于电脑端虚拟网卡模式", answer: "默认模式仅代理系统代理设置覆盖的流量。若要让其他桌面软件也通过代理连接，请在 AeroVPN 配置中启用 TUN 入站。部分校园网环境可能存在限制，请视实际网络情况测试。" },
-  { question: "关于路由模式介绍", bullets: ["自动模式：按照配置文件的路由规则决定流量走向。", "全局模式：所有网络请求均通过代理服务器。"], footer: "路由行为取决于当前选中的配置文件。" },
+  { question: "关于路由模式介绍", bullets: ["自动模式：按照配置文件的路由规则决定流量走向。", "全局模式：所有网络请求均通过代理服务器。"] },
 ];
 
 export function AeroFaqView() {
@@ -42,7 +42,6 @@ export function AeroFaqView() {
                 <div className={styles.faqAnswer}>
                   {item.answer && <p>{item.answer}</p>}
                   {item.bullets?.map((bullet) => <p className={styles.faqBullet} key={bullet}><span>•</span>{bullet}</p>)}
-                  {item.footer && <small>{item.footer}</small>}
                 </div>
               )}
             </section>

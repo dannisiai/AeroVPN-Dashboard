@@ -407,7 +407,6 @@
 .faq-answer { padding: 0 20px 20px; color: #57534e; font-size: 13px; line-height: 1.6; }
 .faq-answer p { margin: 0 0 8px; }
 .faq-answer p:last-child { margin-bottom: 0; }
-.faq-answer small { display: block; margin-top: 6px; color: #a8a29e; font-size: 12px; }
 .faq-bullet { display: flex; align-items: flex-start; gap: 7px; }
 .faq-bullet span { color: #57534e; font-size: 14px; font-weight: 700; }
 
