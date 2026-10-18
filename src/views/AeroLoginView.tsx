@@ -177,12 +177,9 @@ export function AeroLoginView(props: {
           <Icon name="language" size={18} />
           <select
             aria-label={t("Language")}
-            value={preference}
+            value={preference === "auto" ? language : preference}
             onChange={(event) => setPreference(event.currentTarget.value as LanguagePreference)}
           >
-            <option value="auto">
-              {t("System")} · {language === "zh-Hans" ? "ZH" : language === "zh-Hant" ? "ZH-TW" : language.toUpperCase()}
-            </option>
             {LANGUAGES.map((entry) => <option key={entry.value} value={entry.value}>{entry.label}</option>)}
           </select>
         </label>

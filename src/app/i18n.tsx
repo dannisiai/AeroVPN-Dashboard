@@ -10,7 +10,7 @@ import {
 
 import { Select } from "../components/ui";
 import { watchStoredValues } from "../lib/storage";
-import { LANGUAGES, TRANSLATIONS, type Language, type MessageKey, type PluralForms } from "./translations";
+import { LANGUAGES, TRANSLATIONS, type Language, type MessageKey } from "./translations";
 import {
   detectSystemLanguage,
   loadLanguagePreference,
@@ -24,26 +24,8 @@ export type { Language, MessageKey };
 export type TranslateParams = Record<string, string | number>;
 export type Translate = (key: MessageKey, params?: TranslateParams) => string;
 
-const pluralRulesCache = new Map<Language, Intl.PluralRules>();
-
 function translate(language: Language, key: MessageKey, params?: TranslateParams): string {
-  const entry: string | PluralForms = language === "en" ? key : (TRANSLATIONS[key]?.[language] ?? key);
-  let text: string;
-  if (typeof entry === "string") {
-    text = entry;
-  } else {
-    const count = typeof params?.count === "number" ? params.count : null;
-    if (count === null) {
-      text = entry.other;
-    } else {
-      let rules = pluralRulesCache.get(language);
-      if (!rules) {
-        rules = new Intl.PluralRules(language);
-        pluralRulesCache.set(language, rules);
-      }
-      text = entry[rules.select(count)] ?? entry.other;
-    }
-  }
+  let text = language === "en" ? key : (TRANSLATIONS[key]?.[language] ?? key);
   if (params) {
     for (const [name, value] of Object.entries(params)) {
       text = text.replaceAll(`{${name}}`, String(value));
@@ -87,7 +69,7 @@ export function I18nProvider(props: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = language;
-    document.documentElement.dir = language === "fa" ? "rtl" : "ltr";
+    document.documentElement.dir = "ltr";
   }, [language]);
 
   const value = useMemo<I18n>(
@@ -107,10 +89,7 @@ export function I18nProvider(props: { children: ReactNode }) {
 }
 
 export function LanguageSelect() {
-  const { t, preference, setPreference } = useI18n();
-  const options: { value: LanguagePreference; label: string }[] = [
-    { value: "auto", label: t("System") },
-    ...LANGUAGES.map((language) => ({ value: language.value, label: language.label })),
-  ];
-  return <Select inline options={options} value={preference} onChange={setPreference} />;
+  const { language, preference, setPreference } = useI18n();
+  const options = LANGUAGES.map((language) => ({ value: language.value, label: language.label }));
+  return <Select inline options={options} value={preference === "auto" ? language : preference} onChange={setPreference} />;
 }
