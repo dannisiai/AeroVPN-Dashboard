@@ -4,7 +4,9 @@ import { navigate, useApi } from "../app/context";
 import { loadAeroConnectionMode } from "../app/connectionMode";
 import type { AeroAccountSnapshot, AeroConnectionSnapshot, AeroRegionSnapshot, DesktopHost } from "../app/desktop";
 import { useI18n } from "../app/i18n";
+import { nodeNumberForCity } from "../app/regionNodes";
 import aeroLogo from "../assets/aero-logo.png";
+import { Icon } from "../components/Icon";
 import { AeroIcon } from "../components/AeroIcon";
 import { Dialog } from "../components/ui";
 import { ServiceStatus_Type } from "../gen/daemon/started_service_pb";
@@ -27,6 +29,9 @@ export function AeroHomeView(props: {
   const [regionId, setRegionId] = useState(() => window.localStorage.getItem(SELECTED_REGION_KEY));
   const [cityId, setCityId] = useState(() => window.localStorage.getItem(SELECTED_CITY_KEY));
   const [regionPickerOpen, setRegionPickerOpen] = useState(false);
+  const [expandedRegionIds, setExpandedRegionIds] = useState<Set<string>>(() =>
+    regionId === null ? new Set() : new Set([regionId]),
+  );
   const [regionsLoading, setRegionsLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -104,10 +109,19 @@ export function AeroHomeView(props: {
         ? `${plan.trafficGb.toFixed(1)} GB`
         : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(1)} GB`;
 
-  const displayCity = connection?.cityName ?? selectedCity?.name ?? t("Choose a region");
+  const selectedNodeNumber = nodeNumberForCity(regions, selectedRegion?.id ?? null, selectedCity?.id ?? null);
+  const displayCity = selectedCity !== null
+    ? t("Node {number}", { number: selectedNodeNumber ?? 1 })
+    : connection !== null
+      ? t("Node {number}", { number: 1 })
+      : t("Choose a region");
   const displayCountry = connection?.countryName ?? selectedRegion?.name ?? t("Server list unavailable");
   const displayFlag = selectedRegion?.flagEmoji ?? "🌐";
   const latency = selectedCity?.latencyMs ?? null;
+  const openRegionPicker = () => {
+    setExpandedRegionIds(regionId === null ? new Set() : new Set([regionId]));
+    setRegionPickerOpen(true);
+  };
 
   const selectCity = (region: AeroRegionSnapshot, cityIdValue: string) => {
     setRegionId(region.id);
@@ -198,7 +212,7 @@ export function AeroHomeView(props: {
         <button
           type="button"
           className={styles.serverCard}
-          onClick={() => setRegionPickerOpen(true)}
+          onClick={openRegionPicker}
           aria-label={t("Change server")}
           disabled={regionsLoading || regions.length === 0}
         >
@@ -250,37 +264,80 @@ export function AeroHomeView(props: {
       </div>
 
       {regionPickerOpen && (
-        <Dialog onClose={() => setRegionPickerOpen(false)}>
-          <h2>{t("Choose a region")}</h2>
-          <div className="dialog-message">
-            <p>{t("Select an available server region and city.")}</p>
-            <div className={styles.regionList}>
-              {regions.map((region) => (
+        <Dialog onClose={() => setRegionPickerOpen(false)} className={styles.regionPickerDialog}>
+          <h2 className={styles.visuallyHidden}>{t("Select server location")}</h2>
+          <header className={styles.regionPickerHeader}>
+            <button
+              type="button"
+              className={styles.regionPickerClose}
+              aria-label={t("Close")}
+              title={t("Close")}
+              onClick={() => setRegionPickerOpen(false)}
+            >
+              <Icon name="close" size={20} />
+            </button>
+          </header>
+          <div className={styles.regionList}>
+            {regions.map((region) => {
+              const expanded = expandedRegionIds.has(region.id);
+              return (
                 <section className={styles.regionGroup} key={region.id}>
-                  <h3>{region.flagEmoji} {region.name}{region.recommended ? ` · ${t("Recommended")}` : ""}</h3>
-                  <div className={styles.cityList}>
-                    {region.cities.map((city) => {
-                      const selected = region.id === regionId && city.id === cityId;
-                      return (
-                        <button
-                          type="button"
-                          key={city.id}
-                          className={`${styles.cityOption} ${selected ? styles.cityOptionSelected : ""}`}
-                          aria-pressed={selected}
-                          onClick={() => selectCity(region, city.id)}
-                        >
-                          <span>{city.name}</span>
-                          <span>{city.latencyMs > 0 ? `${city.latencyMs} ms` : "—"}</span>
-                        </button>
-                      );
+                  <button
+                    type="button"
+                    className={styles.regionHeader}
+                    aria-expanded={expanded}
+                    onClick={() => setExpandedRegionIds((current) => {
+                      const next = new Set(current);
+                      if (next.has(region.id)) next.delete(region.id);
+                      else next.add(region.id);
+                      return next;
                     })}
-                  </div>
+                  >
+                    <span className={styles.regionFlag} aria-hidden="true">{region.flagEmoji}</span>
+                    <span className={styles.regionHeadingCopy}>
+                      <span className={styles.regionHeadingTitle}>
+                        <strong>{region.name}</strong>
+                      </span>
+                      <small>{t("{count} locations", { count: region.cities.length })}</small>
+                    </span>
+                    <Icon name={expanded ? "expand_less" : "expand_more"} size={22} />
+                  </button>
+                  {expanded && (
+                    <div className={styles.cityList}>
+                      {region.cities.map((city) => {
+                        const selected = region.id === regionId && city.id === cityId;
+                        const latencyTone = city.latencyMs <= 0
+                          ? styles.cityLatencyUnavailable
+                          : city.latencyMs < 60
+                            ? styles.cityLatencyFast
+                            : styles.cityLatencySlower;
+                        return (
+                          <button
+                            type="button"
+                            key={city.id}
+                            className={`${styles.cityOption} ${selected ? styles.cityOptionSelected : ""}`}
+                            aria-pressed={selected}
+                            onClick={() => selectCity(region, city.id)}
+                          >
+                            <span className={styles.cityFlag} aria-hidden="true">{region.flagEmoji}</span>
+                            <span className={styles.cityName}>
+                              {t("Node {number}", { number: nodeNumberForCity(regions, region.id, city.id) ?? 1 })}
+                            </span>
+                            <span className={`${styles.cityLatency} ${latencyTone}`}>
+                              <i aria-hidden="true" />
+                              {city.latencyMs > 0 ? `${city.latencyMs} ms` : "—"}
+                            </span>
+                            {selected
+                              ? <span className={styles.citySelectedCheck}><Icon name="check" size={12} /></span>
+                              : <span className={styles.cityCheckPlaceholder} aria-hidden="true" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </section>
-              ))}
-            </div>
-          </div>
-          <div className="row-actions dialog-actions">
-            <button type="button" className="button" onClick={() => setRegionPickerOpen(false)}>{t("Cancel")}</button>
+              );
+            })}
           </div>
         </Dialog>
       )}

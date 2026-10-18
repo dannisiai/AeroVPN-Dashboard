@@ -6,7 +6,7 @@ import { LanguageSelect, useI18n } from "../app/i18n";
 import type { AeroConnectionMode, DesktopHost } from "../app/desktop";
 import { showError } from "../app/errorStore";
 import { AeroIcon, type AeroIconName } from "../components/AeroIcon";
-import { Select } from "../components/ui";
+import { Button, Dialog, Select } from "../components/ui";
 import styles from "./AeroPages.module.css";
 
 export function AeroSettingsView(props: { host: DesktopHost }) {
@@ -15,6 +15,8 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
   const [busy, setBusy] = useState(false);
   const [connectionMode, setConnectionMode] = useState<AeroConnectionMode>(loadAeroConnectionMode);
   const [connectionActive, setConnectionActive] = useState(false);
+  const [appVersion, setAppVersion] = useState("");
+  const [dialog, setDialog] = useState<"updates" | "terms" | "privacy" | null>(null);
 
   const refresh = useCallback(async () => {
     const [settings, activeConnection] = await Promise.all([
@@ -27,6 +29,14 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
   }, [props.host]);
 
   useEffect(() => { void refresh().catch(showError); }, [refresh]);
+
+  useEffect(() => {
+    let disposed = false;
+    void props.host.appVersion().then((version) => {
+      if (!disposed) setAppVersion(version);
+    }).catch(() => {});
+    return () => { disposed = true; };
+  }, [props.host]);
 
   const toggleOpenAtLogin = async () => {
     const next = !openAtLogin;
@@ -96,14 +106,64 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
               ]}
               onChange={changeConnectionMode}
             />,
-            connectionMode === "system_proxy"
-              ? t("Windows system proxy routes supported apps through AeroVPN. Apps that ignore system proxy settings are not covered.")
-              : t("Connections use the managed TUN configuration."),
           )}
+        </div>
+
+        <h2 className={styles.listSectionTitle}>{t("Updates & Support")}</h2>
+        <div className={styles.listCard}>
+          {row(t("Check for Updates"), "system_update", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => setDialog("updates"))}
+          <div className={styles.rowDivider} />
+          {row(t("Terms of Service"), "description", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => setDialog("terms"))}
+          <div className={styles.rowDivider} />
+          {row(t("Privacy Policy"), "security", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => setDialog("privacy"))}
         </div>
 
         <div className={styles.pageBottomSpace} />
       </div>
+
+      {dialog !== null && (
+        <Dialog onClose={() => setDialog(null)}>
+          {dialog === "updates" ? (
+            <>
+              <h3>{t("Version Update")}</h3>
+              <div className={styles.updateDialogBody}>
+                <div className={styles.updateVersionCard}>
+                  <AeroIcon name="info" size={36} />
+                  <strong>{t("Current Version: {version}", { version: appVersion || "—" })}</strong>
+                </div>
+                <p className="dialog-message">{t("Automatic update check is not configured in this build. Please download the latest release from the official website.")}</p>
+              </div>
+              <div className="row-actions dialog-actions">
+                <Button variant="primary" onClick={() => setDialog(null)}>{t("Confirm")}</Button>
+              </div>
+            </>
+          ) : dialog === "terms" ? (
+            <>
+              <h3>{t("Terms of Service")}</h3>
+              <div className={styles.legalDialogContent}>
+                <p>{t("1. Users must comply with the laws and regulations applicable in their location and the server’s location.")}</p>
+                <p>{t("2. This service is intended only for lawful academic research, cross-border business, and privacy protection.")}</p>
+                <p>{t("3. Using this service for cyberattacks, traffic abuse, or infringement of others’ legal rights is prohibited.")}</p>
+              </div>
+              <div className="row-actions dialog-actions">
+                <Button onClick={() => setDialog(null)}>{t("Got it")}</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3>{t("Privacy Policy")}</h3>
+              <div className={styles.legalDialogContent}>
+                <p>{t("AeroVPN strictly follows a Strict No-Logs Policy:")}</p>
+                <p>{t("• We never record or store users’ browsing history, traffic destinations, or DNS queries.")}</p>
+                <p>{t("• Military-grade ChaCha20-Poly1305 / AES-256-GCM encryption protects every connection.")}</p>
+              </div>
+              <div className="row-actions dialog-actions">
+                <Button variant="primary" onClick={() => setDialog(null)}>{t("Confirm")}</Button>
+              </div>
+            </>
+          )}
+        </Dialog>
+      )}
     </section>
   );
 }

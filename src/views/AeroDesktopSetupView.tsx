@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { AeroAccountSnapshot, AeroRegionSnapshot, DaemonConnectionState, DesktopHost } from "../app/desktop";
 import { navigate } from "../app/context";
 import { useI18n } from "../app/i18n";
+import { nodeNumberForCity } from "../app/regionNodes";
 import { AeroIcon } from "../components/AeroIcon";
 import { Button, Dialog, Spinner } from "../components/ui";
 import aeroLogo from "../assets/aero-logo.png";
@@ -43,6 +44,7 @@ export function AeroDesktopSetupView(props: {
 
   const setupRegion = regions.find((region) => region.recommended) ?? regions[0] ?? null;
   const setupCity = setupRegion?.cities[0] ?? null;
+  const setupNodeNumber = nodeNumberForCity(regions, setupRegion?.id ?? null, setupCity?.id ?? null);
   const plan = props.account.plan;
   const planActive = plan?.status === "active" && plan.expiresAt > Math.floor(Date.now() / 1000);
   const remainingDays = planActive && plan !== null
@@ -106,7 +108,7 @@ export function AeroDesktopSetupView(props: {
         <div className={homeStyles.serverCard}>
           <span className={homeStyles.flagAvatar} aria-hidden="true">{setupRegion?.flagEmoji ?? "🌐"}</span>
           <span className={homeStyles.locationDetails}>
-            <span className={homeStyles.locationTitle}><strong>{setupCity?.name ?? t("Choose a region")}</strong><span>{setupRegion?.name ?? t("Loading...")}</span></span>
+            <span className={homeStyles.locationTitle}><strong>{setupCity ? t("Node {number}", { number: setupNodeNumber ?? 1 }) : t("Choose a region")}</strong><span>{setupRegion?.name ?? t("Loading...")}</span></span>
             <span className={homeStyles.latency}><span className={homeStyles.latencyDot} />{setupCity ? `${setupCity.latencyMs} ms` : "—"}</span>
           </span>
         </div>

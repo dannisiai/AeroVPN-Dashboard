@@ -373,6 +373,29 @@
 .setting-row-clickable { cursor: pointer; }
 .page-bottom-space { height: 20px; }
 
+.update-dialog-body { display: grid; gap: 14px; }
+.update-version-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  background: #f4f2ec;
+  border: 1.2px solid #e2ddd1;
+  border-radius: 14px;
+}
+.update-version-card .icon { color: #1c1917; }
+.update-version-card strong { font-size: 16px; font-weight: 700; }
+.legal-dialog-content {
+  max-height: 55vh;
+  overflow-y: auto;
+  color: #57534e;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.legal-dialog-content p { margin: 0 0 14px; }
+.legal-dialog-content p:last-child { margin-bottom: 0; }
+
 .faq-body {
   flex: 1;
   min-height: 0;

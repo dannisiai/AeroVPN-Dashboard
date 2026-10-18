@@ -36,11 +36,12 @@ const demoApi = {
   serviceStatus: fixedStream({ status: { status: ServiceStatus_Type.STARTED } }),
 } as unknown as DaemonApi;
 
-const demoAccount = { email: "2171300946@qq.com", plan: null } satisfies AeroAccountSnapshot;
+const demoAccount = { email: "demo@example.com", plan: null } satisfies AeroAccountSnapshot;
 
 const demoHost = {
   platform: "win32",
   managedMode: true,
+  appVersion: async () => "1.14.3",
   profiles: {
     list: async () => ({
       selectedId: null,

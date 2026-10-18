@@ -64,6 +64,7 @@ const EXISTING_ICONS: Partial<Record<AeroIconName, IconName>> = {
   keyboard_arrow_right: "keyboard_arrow_right",
   power_settings_new: "power_settings_new",
   sync: "sync",
+  sync_rounded: "sync",
   download: "download",
   upload: "upload",
   swap_vert: "swap_vert",
