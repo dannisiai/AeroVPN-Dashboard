@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useI18n } from "../app/i18n";
-import type { AeroAccountSnapshot, AeroConnectSessionSnapshot, AeroRegionSnapshot, DesktopHost } from "../app/desktop";
+import type { AeroAccountSnapshot, DesktopHost } from "../app/desktop";
 import { AeroIcon } from "../components/AeroIcon";
 import { Button, Dialog } from "../components/ui";
 import aeroAvatar from "../assets/aero-avatar.png";
@@ -15,11 +15,8 @@ export function AeroAccountView(props: {
 }) {
   const { t, language } = useI18n();
   const [account, setAccount] = useState(props.account);
-  const [sessions, setSessions] = useState<AeroConnectSessionSnapshot[]>([]);
-  const [regions, setRegions] = useState<AeroRegionSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshError, setRefreshError] = useState("");
-  const [busySessionId, setBusySessionId] = useState<string | null>(null);
   const [showLogout, setShowLogout] = useState(false);
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [logoutError, setLogoutError] = useState("");
@@ -29,23 +26,15 @@ export function AeroAccountView(props: {
   const refresh = useCallback(async () => {
     setLoading(true);
     setRefreshError("");
-    const results = await Promise.allSettled([
-      props.host.auth.refreshAccount(),
-      props.host.auth.listConnectSessions(),
-      props.host.auth.getRegions(),
-    ]);
-    const errors: string[] = [];
-    if (results[0].status === "fulfilled") {
-      setAccount(results[0].value);
-      props.onAccountUpdated?.(results[0].value);
+    try {
+      const updatedAccount = await props.host.auth.refreshAccount();
+      setAccount(updatedAccount);
+      props.onAccountUpdated?.(updatedAccount);
+    } catch (error) {
+      setRefreshError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoading(false);
     }
-    else errors.push(results[0].reason instanceof Error ? results[0].reason.message : String(results[0].reason));
-    if (results[1].status === "fulfilled") setSessions(results[1].value);
-    else errors.push(results[1].reason instanceof Error ? results[1].reason.message : String(results[1].reason));
-    if (results[2].status === "fulfilled") setRegions(results[2].value);
-    else errors.push(results[2].reason instanceof Error ? results[2].reason.message : String(results[2].reason));
-    if (errors.length > 0) setRefreshError(errors.join("\n"));
-    setLoading(false);
   }, [props.host, props.onAccountUpdated]);
 
   useEffect(() => { void refresh(); }, [refresh]);
@@ -56,8 +45,6 @@ export function AeroAccountView(props: {
   const validUntil = plan === null || plan.expiresAt <= 0
     ? "--"
     : new Intl.DateTimeFormat(language, { dateStyle: "medium" }).format(new Date(plan.expiresAt * 1000));
-  const activeSessions = sessions.filter((session) => !session.revoked && session.expiresAt > Math.floor(Date.now() / 1000));
-  const activeDevices = new Set(activeSessions.map((session) => session.deviceId)).size;
 
   async function logout() {
     setLogoutBusy(true);
@@ -71,23 +58,6 @@ export function AeroAccountView(props: {
       setLogoutBusy(false);
     }
   }
-
-  async function revoke(sessionId: string) {
-    setBusySessionId(sessionId);
-    setRefreshError("");
-    try {
-      await props.host.auth.revokeConnectSession(sessionId);
-      await refresh();
-    } catch (error) {
-      setRefreshError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setBusySessionId(null);
-    }
-  }
-
-  const formatDateTime = (seconds: number) => seconds <= 0
-    ? "--"
-    : new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short" }).format(new Date(seconds * 1000));
 
   return (
     <section className={styles.page}>
@@ -118,8 +88,8 @@ export function AeroAccountView(props: {
             <span>{t("Valid until")}</span><strong>{validUntil}</strong>
           </div>
           <div className={styles.subscriptionRow}>
-            <span>{t("Simultaneous devices")}</span>
-            <strong>{plan === null ? "0 / 0" : `${activeDevices} / ${plan.maxDevices}`}</strong>
+            <span>{t("Device limit")}</span>
+            <strong>{plan?.maxDevices ?? 0}</strong>
           </div>
           {plan?.trafficGb !== null && plan?.trafficGb !== undefined && plan.trafficGb > 0 && (
             <div className={styles.subscriptionRow}>
@@ -130,37 +100,7 @@ export function AeroAccountView(props: {
           {!active && <div className={styles.noPlanHint}>{t("No active subscription. Please purchase a plan before connecting.")}</div>}
         </section>
 
-        <div className={styles.sessionHeading}>
-          <h2 className={styles.sectionCaption}>{t("Active Connections")}</h2>
-          <span>{loading ? t("Loading...") : `${activeSessions.length}`}</span>
-        </div>
         {refreshError && <div className={styles.accountError} role="status">{refreshError}</div>}
-        <section className={styles.sessionList}>
-          {activeSessions.length === 0 ? (
-            <p className={styles.sessionEmpty}>{loading ? t("Loading...") : t("No active connections")}</p>
-          ) : activeSessions.map((session) => {
-            const region = regions.find((item) => item.id === session.regionId);
-            const isBusy = busySessionId === session.sessionId;
-            return (
-              <div className={styles.sessionRow} key={session.sessionId}>
-                <div className={styles.sessionCopy}>
-                  <strong>{region?.flagEmoji ?? "🌐"} {region?.name ?? session.regionId} · {session.protocol.toUpperCase()}</strong>
-                  <span>{session.currentDevice ? t("This device") : session.deviceId}</span>
-                  <small>{t("Connected at")}: {formatDateTime(session.issuedAt)} · {t("Expires")}: {formatDateTime(session.expiresAt)}</small>
-                </div>
-                <button
-                  type="button"
-                  className={styles.revokeSessionButton}
-                  disabled={isBusy}
-                  onClick={() => void revoke(session.sessionId)}
-                >
-                  {isBusy ? t("Sending...") : t("Disconnect")}
-                </button>
-              </div>
-            );
-          })}
-        </section>
-
         <button type="button" className={styles.logoutButton} onClick={() => setShowLogout(true)}>
           <AeroIcon name="logout" size={18} />{t("Log Out")}
         </button>
