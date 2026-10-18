@@ -2,20 +2,29 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 import { navigate } from "../app/context";
+import { loadAeroConnectionMode, saveAeroConnectionMode } from "../app/connectionMode";
 import { LanguageSelect, useI18n } from "../app/i18n";
-import type { DesktopHost } from "../app/desktop";
+import type { AeroConnectionMode, DesktopHost } from "../app/desktop";
 import { showError } from "../app/errorStore";
 import { AeroIcon, type AeroIconName } from "../components/AeroIcon";
+import { Select } from "../components/ui";
 import styles from "./AeroPages.module.css";
 
 export function AeroSettingsView(props: { host: DesktopHost }) {
   const { t } = useI18n();
   const [openAtLogin, setOpenAtLogin] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [connectionMode, setConnectionMode] = useState<AeroConnectionMode>(loadAeroConnectionMode);
+  const [connectionActive, setConnectionActive] = useState(false);
 
   const refresh = useCallback(async () => {
-    const settings = await props.host.settings.get();
+    const [settings, activeConnection] = await Promise.all([
+      props.host.settings.get(),
+      props.host.auth.activeConnection().catch(() => null),
+    ]);
     setOpenAtLogin(settings.openAtLogin);
+    setConnectionMode(loadAeroConnectionMode());
+    setConnectionActive(activeConnection !== null);
   }, [props.host]);
 
   useEffect(() => { void refresh().catch(showError); }, [refresh]);
@@ -32,6 +41,11 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
     } finally {
       setBusy(false);
     }
+  };
+
+  const changeConnectionMode = (mode: AeroConnectionMode) => {
+    setConnectionMode(mode);
+    saveAeroConnectionMode(mode);
   };
 
   const row = (title: string, icon: AeroIconName, trailing: ReactNode, subtitle?: string, onClick?: () => void) => (
@@ -70,7 +84,23 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
 
         <h2 className={styles.listSectionTitle}>{t("Connection Settings")}</h2>
         <div className={styles.listCard}>
-          {row(t("Connection Mode"), "route", t("TUN (device-wide)"), t("Connections use the managed TUN configuration."))}
+          {row(
+            t("Connection Mode"),
+            "route",
+            <Select<AeroConnectionMode>
+              inline
+              value={connectionMode}
+              disabled={busy || connectionActive || props.host.platform !== "win32"}
+              options={[
+                { value: "tun", label: t("TUN (device-wide)") },
+                { value: "system_proxy", label: t("System Proxy") },
+              ]}
+              onChange={changeConnectionMode}
+            />,
+            connectionMode === "system_proxy"
+              ? t("Windows system proxy routes supported apps through AeroVPN. Apps that ignore system proxy settings are not covered.")
+              : t("Connections use the managed TUN configuration."),
+          )}
           <div className={styles.rowDivider} />
           {row(t("Kill Switch"), "shield", toggle(false, true, t("Kill Switch"), () => {}), t("This AeroVPN desktop build does not expose a kill-switch control."))}
           <div className={styles.rowDivider} />

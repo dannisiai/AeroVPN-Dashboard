@@ -123,7 +123,6 @@ export function applyTheme(preference: ThemePreference) {
 
 export const ACCENT_PRESETS = [
   "default",
-  "blue",
   "purple",
   "pink",
   "red",

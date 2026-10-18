@@ -10,7 +10,7 @@ type MoreAction = "agent" | "website" | "orders" | "support" | "channel" | "tick
 const actionDetails: Record<Exclude<MoreAction, "tools">, { title: string; icon: AeroIconName; color: string; body: string }> = {
   agent: { title: "申请代理合作", icon: "handshake", color: "#16a34a", body: "欢迎加入 AeroVPN 商业分销伙伴网络。商务合作：Telegram @AeroVPN_Partner · partner@aerovpn.com" },
   website: { title: "官方网站", icon: "public", color: "#ea580c", body: "AeroVPN 官方主站：https://aerovpn.com" },
-  orders: { title: "我的订单记录", icon: "receipt", color: "#0284c7", body: "当前账户 API 尚未提供订单查询接口。" },
+  orders: { title: "我的订单记录", icon: "receipt", color: "#57534e", body: "当前账户 API 尚未提供订单查询接口。" },
   support: { title: "在线客服", icon: "support_agent", color: "#ef4444", body: "当前客户端尚未接入在线客服服务。" },
   channel: { title: "官方频道", icon: "campaign", color: "#7c3aed", body: "AeroVPN 官方 Telegram 频道：https://t.me/AeroVPN_Official" },
   tickets: { title: "工单列表", icon: "confirmation_number", color: "#9333ea", body: "当前账户 API 尚未提供工单查询接口。" },

@@ -31,13 +31,13 @@
 }
 
 .faq-button:hover {
-  background: #eaEEF4;
+  background: #f4f2ec;
 }
 
 .faq-button:focus-visible,
 .server-card:focus-visible,
 .connect-button:focus-visible {
-  outline: 2px solid #0066ff;
+  outline: 2px solid #1c1917;
   outline-offset: 2px;
 }
 
@@ -76,7 +76,7 @@
 .connect-button:hover:not(:disabled) {
   width: 174px;
   height: 174px;
-  border-color: #0066ff;
+  border-color: #1c1917;
   box-shadow: 0 8px 36px 3px rgb(0 0 0 / 13%);
 }
 
@@ -253,8 +253,8 @@
 }
 
 .plan-icon-cloud {
-  color: #0284c7;
-  background: #e0f2fe;
+  color: #57534e;
+  background: #f0eee8;
 }
 
 .plan-icon-time {
@@ -263,8 +263,8 @@
 }
 
 .plan-icon-traffic {
-  color: #64748b;
-  background: #f1f5f9;
+  color: #78716c;
+  background: #f5f3ef;
 }
 
 .plan-column > strong {
@@ -355,8 +355,8 @@
 
 .city-option:hover,
 .city-option-selected {
-  border-color: #0066ff;
-  background: #eff6ff;
+  border-color: #1c1917;
+  background: #f4f2ec;
 }
 
 .city-option > span:first-child {

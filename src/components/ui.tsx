@@ -393,7 +393,6 @@ export function ThemeSelect(props: {
 
 const ACCENT_TITLES: Record<AccentPreset, MessageKey> = {
   default: "Default",
-  blue: "Blue",
   purple: "Purple",
   pink: "Pink",
   red: "Red",

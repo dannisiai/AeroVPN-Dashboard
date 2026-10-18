@@ -25,7 +25,7 @@
   align-items: center;
   gap: 7px;
   padding: 6px 9px;
-  color: #0066ff;
+  color: #1c1917;
   font-size: 12px;
   font-weight: 700;
   background: transparent;
@@ -33,7 +33,7 @@
   border-radius: 9px;
 }
 
-.language-control:hover { background: rgb(0 102 255 / 6%); }
+.language-control:hover { background: #f4f2ec; }
 .language-control select { max-width: 150px; color: inherit; font: inherit; cursor: pointer; background: transparent; border: 0; outline: 0; }
 .language-control option { color: #1c1917; }
 
@@ -112,8 +112,8 @@
 }
 
 .mode-switch button:hover { background: #f4f2ec; }
-.mode-switch .mode-selected { color: #fff; background: #0066ff; }
-.mode-switch .mode-selected:hover { background: #0052cc; }
+.mode-switch .mode-selected { color: #fff; background: #1c1917; }
+.mode-switch .mode-selected:hover { background: #000; }
 
 .field {
   display: flex;
@@ -140,8 +140,8 @@
 }
 
 .input-wrap:focus-within {
-  border-color: #0066ff;
-  box-shadow: 0 0 0 3px rgb(0 102 255 / 10%);
+  border-color: #1c1917;
+  box-shadow: 0 0 0 3px rgb(28 25 23 / 10%);
 }
 
 .input-wrap > svg { flex: 0 0 20px; width: 20px; height: 20px; }
@@ -169,17 +169,17 @@
   flex: 0 0 auto;
   min-height: 52px;
   padding: 0 14px;
-  color: #0066ff;
+  color: #1c1917;
   font: inherit;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   background: #fff;
-  border: 1.2px solid #0066ff;
+  border: 1.2px solid #1c1917;
   border-radius: 10px;
 }
 
-.code-button:hover:not(:disabled) { background: rgb(0 102 255 / 6%); }
+.code-button:hover:not(:disabled) { background: #f4f2ec; }
 .code-button:disabled { cursor: default; opacity: 0.55; }
 
 .password-toggle {
@@ -195,7 +195,7 @@
 }
 
 .password-toggle:hover { color: #57534e; }
-.forgot-button { align-self: flex-end; padding: 0; margin: -4px 1px 14px; color: #0066ff; font: inherit; font-size: 13px; cursor: pointer; background: transparent; border: 0; }
+.forgot-button { align-self: flex-end; padding: 0; margin: -4px 1px 14px; color: #1c1917; font: inherit; font-size: 13px; cursor: pointer; background: transparent; border: 0; }
 .forgot-button:hover { text-decoration: underline; }
 
 .error-message,
@@ -215,7 +215,7 @@
 
 .forgot-field { display: flex; flex-direction: column; gap: 7px; margin-top: 15px; color: #57534e; font-size: 13px; }
 .forgot-field input { min-height: 42px; padding: 0 12px; color: #1c1917; font: inherit; background: #fff; border: 1px solid #e2ddd1; border-radius: 10px; }
-.forgot-field input:focus { border-color: #0066ff; outline: 2px solid rgb(0 102 255 / 12%); }
+.forgot-field input:focus { border-color: #1c1917; outline: 2px solid rgb(28 25 23 / 12%); }
 
 @media (max-width: 520px) {
   .page { padding-inline: 20px; }

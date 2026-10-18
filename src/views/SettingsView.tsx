@@ -745,7 +745,7 @@ const CUSTOM_THEME_PLACEHOLDER = `{
   "background": "#1e1e1e",
   "foreground": "#d4d4d4",
   "cursor": "#d4d4d4",
-  "selectionBackground": "#264f78"
+  "selectionBackground": "#444444"
 }`;
 
 function ThemeSchemeSection(props: {

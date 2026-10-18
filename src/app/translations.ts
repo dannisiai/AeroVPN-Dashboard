@@ -71,6 +71,8 @@ export const TRANSLATIONS = {
   "Connection Settings": { "zh-Hans": "连接设置", "zh-Hant": "連線設定", "fa": "تنظیمات اتصال", "ru": "Настройки подключения" },
   "Connection Mode": { "zh-Hans": "连接模式", "zh-Hant": "連線模式", "fa": "حالت اتصال", "ru": "Режим подключения" },
   "TUN (device-wide)": { "zh-Hans": "TUN（全设备流量）", "zh-Hant": "TUN（全裝置流量）", "fa": "TUN (تمام دستگاه)", "ru": "TUN (весь трафик устройства)" },
+  "System Proxy": { "zh-Hans": "系统代理", "zh-Hant": "系統代理", "fa": "پروکسی سیستم", "ru": "Системный прокси" },
+  "Windows system proxy routes supported apps through AeroVPN. Apps that ignore system proxy settings are not covered.": { "zh-Hans": "Windows 系统代理会将支持系统代理的应用流量交给 AeroVPN；不遵循系统代理设置的应用不受保护。", "zh-Hant": "Windows 系統代理會將支援系統代理的應用流量交給 AeroVPN；不遵循系統代理設定的應用不受保護。" },
   "Connections use the managed TUN configuration.": { "zh-Hans": "连接使用客户端托管的 TUN 配置。", "zh-Hant": "連線使用用戶端管理的 TUN 設定。", "fa": "اتصال‌ها از پیکربندی TUN مدیریت‌شده استفاده می‌کنند.", "ru": "Подключения используют управляемую конфигурацию TUN." },
   "Open at login": { "zh-Hans": "开机启动", "zh-Hant": "開機啟動", "fa": "اجرا هنگام ورود", "ru": "Запускать при входе" },
   "Start the app automatically when you sign in to Windows.": { "zh-Hans": "登录 Windows 时自动启动客户端。", "zh-Hant": "登入 Windows 時自動啟動用戶端。", "fa": "با ورود به ویندوز، برنامه به‌طور خودکار اجرا شود.", "ru": "Автоматически запускать приложение при входе в Windows." },

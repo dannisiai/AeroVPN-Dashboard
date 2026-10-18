@@ -4,6 +4,7 @@ import type { Transport } from "@connectrpc/connect";
 import type {
   AeroAccountSnapshot,
   AeroConnectSessionSnapshot,
+  AeroConnectionMode,
   AeroConnectionSnapshot,
   AeroRegionSnapshot,
 } from "../../../src/shared/ipc";
@@ -17,6 +18,7 @@ import { useLatestRef } from "./useLatest";
 export type {
   AeroAccountSnapshot,
   AeroConnectSessionSnapshot,
+  AeroConnectionMode,
   AeroConnectionSnapshot,
   AeroRegionSnapshot,
 } from "../../../src/shared/ipc";
@@ -228,7 +230,11 @@ export interface DesktopHost {
     refreshAccount(): Promise<AeroAccountSnapshot>;
     getRegions(): Promise<AeroRegionSnapshot[]>;
     activeConnection(): Promise<AeroConnectionSnapshot | null>;
-    connect(regionId: string, cityId: string): Promise<AeroConnectionSnapshot>;
+    connect(
+      regionId: string,
+      cityId: string,
+      mode?: AeroConnectionMode,
+    ): Promise<AeroConnectionSnapshot>;
     disconnect(): Promise<void>;
     listConnectSessions(): Promise<AeroConnectSessionSnapshot[]>;
     revokeConnectSession(sessionId: string): Promise<void>;

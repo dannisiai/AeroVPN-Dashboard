@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { navigate, useApi } from "../app/context";
+import { loadAeroConnectionMode } from "../app/connectionMode";
 import type { AeroAccountSnapshot, AeroConnectionSnapshot, AeroRegionSnapshot, DesktopHost } from "../app/desktop";
 import { useI18n } from "../app/i18n";
 import aeroLogo from "../assets/aero-logo.png";
@@ -115,7 +116,11 @@ export function AeroHomeView(props: { host: DesktopHost; account: AeroAccountSna
         if (selectedRegion === null || selectedCity === null) {
           throw new Error(t("Choose a region before connecting."));
         }
-        const nextConnection = await props.host.auth.connect(selectedRegion.id, selectedCity.id);
+        const nextConnection = await props.host.auth.connect(
+          selectedRegion.id,
+          selectedCity.id,
+          loadAeroConnectionMode(),
+        );
         setConnection(nextConnection);
         setRegionId(nextConnection.regionId);
         setCityId(nextConnection.cityId);
