@@ -238,7 +238,7 @@ function DevicesSection({
           {provider.reason === "insecure"
             ? t("WebUSB requires a secure context. Open the dashboard via localhost or over HTTPS.")
             : t(
-                "To provide devices, use a Chromium-based browser with the sing-box dashboard, or the sing-box graphical client on macOS or Android.",
+                "To provide devices, use a Chromium-based browser with the AeroVPN dashboard, or the AeroVPN graphical client on macOS or Android.",
               )}
         </div>
       )}

@@ -68,11 +68,11 @@ export function AeroDesktopSetupView(props: {
   let title: string;
   switch (props.state.phase) {
     case "connecting": title = t("Connecting..."); break;
-    case "not-installed": title = t("The sing-box service is not installed"); break;
-    case "not-running": title = t("The sing-box service is not running"); break;
-    case "owned-by-other-user": title = t("sing-box is being used by another user"); break;
+    case "not-installed": title = t("The AeroVPN service is not installed"); break;
+    case "not-running": title = t("The AeroVPN service is not running"); break;
+    case "owned-by-other-user": title = t("AeroVPN is being used by another user"); break;
     case "version-mismatch": title = t("Incompatible service version"); break;
-    default: title = t("Cannot connect to the sing-box service"); break;
+    default: title = t("Cannot connect to the AeroVPN service"); break;
   }
 
   const runPrimaryAction = () => {
@@ -99,7 +99,7 @@ export function AeroDesktopSetupView(props: {
           <button type="button" className={`${homeStyles.connectButton} ${props.state.phase === "connecting" ? homeStyles.connecting : ""}`} disabled>
             {props.state.phase === "connecting" ? <span className={homeStyles.spinner} /> : <img className={homeStyles.connectLogo} src={aeroLogo} alt="AeroVPN" />}
           </button>
-          <span className={homeStyles.connectLabel}>{t("Install sing-box to connect")}</span>
+          <span className={homeStyles.connectLabel}>{t("Install AeroVPN to connect")}</span>
         </div>
       </div>
       <div className={homeStyles.bottomSection}>
@@ -130,7 +130,7 @@ export function AeroDesktopSetupView(props: {
           <span className={styles.setupNoticeIcon}><AeroIcon name="cloud_outlined" size={21} /></span>
           <div className={styles.setupNoticeText}>
             <strong>{title}</strong>
-            <span>{t("The AeroVPN interface is ready. Install the local sing-box service to enable connections.")}</span>
+            <span>{t("The AeroVPN interface is ready. Install the local AeroVPN service to enable connections.")}</span>
             {(repairError ?? props.state.errorMessage) && <small>{repairError ?? props.state.errorMessage}</small>}
           </div>
           <Button variant="primary" disabled={repairing || props.state.phase === "connecting"} onClick={runPrimaryAction}>
@@ -153,9 +153,9 @@ export function AeroDesktopSetupView(props: {
   } else {
     content = (
       <section className={pageStyles.page}>
-        <header className={pageStyles.pageHeader}><h1>{t("sing-box")}</h1></header>
+        <header className={pageStyles.pageHeader}><h1>{t("AeroVPN")}</h1></header>
         <div className={styles.profileBody}>
-          <div className={styles.setupNotice}><span className={styles.setupNoticeIcon}><AeroIcon name="cloud_outlined" size={21} /></span><div className={styles.setupNoticeText}><strong>{title}</strong><span>{t("Start the sing-box service to use this page.")}</span></div><Button variant="primary" onClick={runPrimaryAction}>{props.state.phase === "not-installed" ? t("Install") : t("Retry")}</Button></div>
+          <div className={styles.setupNotice}><span className={styles.setupNoticeIcon}><AeroIcon name="cloud_outlined" size={21} /></span><div className={styles.setupNoticeText}><strong>{title}</strong><span>{t("Start the AeroVPN service to use this page.")}</span></div><Button variant="primary" onClick={runPrimaryAction}>{props.state.phase === "not-installed" ? t("Install") : t("Retry")}</Button></div>
         </div>
       </section>
     );
@@ -173,7 +173,7 @@ export function AeroDesktopSetupView(props: {
       />
       <main className={styles.main}>{content}</main>
       {inviteOpen && <Dialog onClose={() => setInviteOpen(false)}><h2>{t("Invite & Earn")}</h2><div className="dialog-message"><p>{t("Referral features are not available from the current account API.")}</p></div><div className="row-actions dialog-actions"><Button onClick={() => setInviteOpen(false)}>{t("Ok")}</Button></div></Dialog>}
-      {confirmingTakeOver && <Dialog onClose={() => (repairing ? undefined : setConfirmingTakeOver(false))}><h2>{t("Take Over sing-box?")}</h2><div className="dialog-message"><p>{t("The other user's sing-box service will stop.")}</p></div><div className="row-actions dialog-actions"><Button onClick={() => setConfirmingTakeOver(false)} disabled={repairing}>{t("Cancel")}</Button><Button variant="danger" disabled={repairing} onClick={() => runRepair(props.host.service.takeOver, () => setConfirmingTakeOver(false))}>{repairing && <Spinner />}{t("Stop and Take Over")}</Button></div></Dialog>}
+      {confirmingTakeOver && <Dialog onClose={() => (repairing ? undefined : setConfirmingTakeOver(false))}><h2>{t("Take Over AeroVPN?")}</h2><div className="dialog-message"><p>{t("The other user's AeroVPN service will stop.")}</p></div><div className="row-actions dialog-actions"><Button onClick={() => setConfirmingTakeOver(false)} disabled={repairing}>{t("Cancel")}</Button><Button variant="danger" disabled={repairing} onClick={() => runRepair(props.host.service.takeOver, () => setConfirmingTakeOver(false))}>{repairing && <Spinner />}{t("Stop and Take Over")}</Button></div></Dialog>}
     </div>
   );
 }

@@ -40,19 +40,19 @@ export function DesktopSetupView(props: {
       title = t("Connecting...");
       break;
     case "not-installed":
-      title = t("The sing-box service is not installed");
+      title = t("The AeroVPN service is not installed");
       break;
     case "not-running":
-      title = t("The sing-box service is not running");
+      title = t("The AeroVPN service is not running");
       break;
     case "owned-by-other-user":
-      title = t("sing-box is being used by another user");
+      title = t("AeroVPN is being used by another user");
       break;
     case "version-mismatch":
       title = t("Incompatible service version");
       break;
     default:
-      title = t("Cannot connect to the sing-box service");
+      title = t("Cannot connect to the AeroVPN service");
       break;
   }
 
@@ -85,13 +85,13 @@ export function DesktopSetupView(props: {
           {state.phase === "owned-by-other-user" && (
             <div className="banner">
               <Icon name="info" />
-              <div>{t("You can take control, which will stop the other user's sing-box service.")}</div>
+              <div>{t("You can take control, which will stop the other user's AeroVPN service.")}</div>
             </div>
           )}
           {packageServiceMissing && (
             <div className="banner error">
               <Icon name="warning_amber" />
-              <div>{t("Reinstall sing-box to restore the system service.")}</div>
+              <div>{t("Reinstall AeroVPN to restore the system service.")}</div>
             </div>
           )}
           {!packageServiceMissing && (
@@ -163,9 +163,9 @@ export function DesktopSetupView(props: {
       </div>
       {confirmingTakeOver && (
         <Dialog onClose={() => (repairing ? undefined : setConfirmingTakeOver(false))}>
-          <h3>{t("Take Over sing-box?")}</h3>
+          <h3>{t("Take Over AeroVPN?")}</h3>
           <p className="dialog-message">
-            {t("The other user's sing-box service will stop.")}
+            {t("The other user's AeroVPN service will stop.")}
           </p>
           <div className="row-actions dialog-actions">
             <Button onClick={() => setConfirmingTakeOver(false)} disabled={repairing}>

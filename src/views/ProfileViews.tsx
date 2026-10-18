@@ -916,7 +916,7 @@ function ProfileQRDialog(props: { profile: DesktopProfile; onClose: () => void }
   const profile = props.profile;
   const importLink =
     profile.remoteUrl !== undefined
-      ? `sing-box://import-remote-profile?url=${encodeURIComponent(profile.remoteUrl)}#${encodeURIComponent(profile.name)}`
+      ? `aerovpn://import-remote-profile?url=${encodeURIComponent(profile.remoteUrl)}#${encodeURIComponent(profile.name)}`
       : null;
 
   return (

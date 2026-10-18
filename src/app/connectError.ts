@@ -45,7 +45,7 @@ export function useDiagnosedConnectError(
     return null;
   }
   if (isUnknownServiceError(message)) {
-    return `${message} — ${t("This is not a sing-box API service, or the path is incorrect.")}`;
+    return `${message} — ${t("This is not a AeroVPN API service, or the path is incorrect.")}`;
   }
   return diagnosis === null ? message : `${message} — ${t(DIAGNOSIS_MESSAGES[diagnosis])}`;
 }

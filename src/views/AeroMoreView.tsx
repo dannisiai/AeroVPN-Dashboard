@@ -51,7 +51,7 @@ export function AeroMoreView(props: { onOpenTools: () => void }) {
           {row("tickets", t("Support Tickets"), "confirmation_number")}
         </div>
 
-        <h2 className={styles.listSectionTitle}>{t("sing-box")}</h2>
+        <h2 className={styles.listSectionTitle}>{t("AeroVPN")}</h2>
         <div className={styles.listCard}>{row("tools", t("Core tools"), "settings")}</div>
       </div>
 

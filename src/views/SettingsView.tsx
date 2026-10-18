@@ -76,14 +76,14 @@ export function SettingsView() {
             <NavRow
               icon="description"
               title={t("Documentation")}
-              href="https://sing-box.sagernet.org"
+              href="https://github.com/dannisiai/AeroVPN-Desktop"
               contextMenu={
                 host !== null ? (
                   <>
-                    <MenuLink href="https://sing-box.sagernet.org/changelog/">
+                    <MenuLink href="https://github.com/dannisiai/AeroVPN-Desktop/releases">
                       {t("Changelog")}
                     </MenuLink>
-                    <MenuLink href="https://sing-box.sagernet.org/configuration/">
+                    <MenuLink href="https://github.com/dannisiai/AeroVPN-Desktop#readme">
                       {t("Configuration")}
                     </MenuLink>
                   </>
@@ -95,12 +95,12 @@ export function SettingsView() {
               title={t("Source Code")}
               href={
                 host !== null
-                  ? "https://github.com/SagerNet/sing-box"
-                  : "https://github.com/SagerNet/sing-box-dashboard"
+                  ? "https://github.com/dannisiai/AeroVPN-Desktop"
+                  : "https://github.com/dannisiai/AeroVPN-Dashboard"
               }
               contextMenu={
                 host !== null ? (
-                  <MenuLink href="https://github.com/SagerNet/sing-box/releases">
+                  <MenuLink href="https://github.com/dannisiai/AeroVPN-Desktop/releases">
                     {t("Releases")}
                   </MenuLink>
                 ) : undefined

@@ -24,7 +24,7 @@ import { cx } from "./lib/cx";
 import { watchStoredValues } from "./lib/storage";
 import styles from "./TrayMenu.module.css";
 
-const TRAY_LOCAL_SERVER: Server = { id: "tray-local", name: "sing-box", url: "", secret: "" };
+const TRAY_LOCAL_SERVER: Server = { id: "tray-local", name: "AeroVPN", url: "", secret: "" };
 
 const HOVER_CLOSE_DELAY = 180;
 
@@ -254,7 +254,7 @@ function TrayMenuContent(props: { host: DesktopHost }) {
       >
         <div className={styles.panel} data-tray-panel>
           <div className={styles.header}>
-            <span className={styles.title}>sing-box</span>
+            <span className={styles.title}>AeroVPN</span>
             {connected ? (
               <Switch
                 label={t("Service")}

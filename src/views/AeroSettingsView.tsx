@@ -72,7 +72,7 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
         <div className={styles.listCard}>
           {row(t("Connection Mode"), "route", t("TUN (device-wide)"), t("Connections use the managed TUN configuration."))}
           <div className={styles.rowDivider} />
-          {row(t("Kill Switch"), "shield", toggle(false, true, t("Kill Switch"), () => {}), t("This sing-box desktop build does not expose a kill-switch control."))}
+          {row(t("Kill Switch"), "shield", toggle(false, true, t("Kill Switch"), () => {}), t("This AeroVPN desktop build does not expose a kill-switch control."))}
           <div className={styles.rowDivider} />
           {row(t("Auto Connect"), "power_settings_new", toggle(false, true, t("Auto Connect"), () => {}), t("Automatic tunnel startup is not exposed by this build."))}
           <div className={styles.rowDivider} />
@@ -90,7 +90,7 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
           {row(t("About"), "info", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/app"))}
         </div>
 
-        <h2 className={styles.listSectionTitle}>{t("sing-box")}</h2>
+        <h2 className={styles.listSectionTitle}>{t("AeroVPN")}</h2>
         <div className={styles.listCard}>
           {row(t("Core settings"), "settings", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/core"))}
           <div className={styles.rowDivider} />
