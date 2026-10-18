@@ -336,6 +336,37 @@
   --accent-soft: color-mix(in srgb, var(--custom-accent), transparent 82%);
 }
 
+html[data-aero-app="true"] {
+  --font-sans: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  --font-serif: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
+  --radius-card: 18px;
+  --radius-xl: 22px;
+  --sidebar-width: 250px;
+}
+
+html[data-aero-app="true"]:not([data-theme="dark"]) {
+  --bg: #faf9f5;
+  --surface: #faf9f5;
+  --card: #faf9f5;
+  --inset: #faf9f5;
+  --text: #1c1917;
+  --text-secondary: #57534e;
+  --text-faint: #a8a29e;
+  --border: #e2ddd1;
+  --border-strong: #c9c2b4;
+  --hover: rgb(28 25 23 / 5%);
+  --good: #10b981;
+  --good-soft: rgb(16 185 129 / 13%);
+  --shadow-card: 0 1px 3px rgb(28 25 23 / 5%);
+}
+
+html[data-aero-app="true"][data-accent="default"] {
+  --accent: #0066ff;
+  --accent-strong: #0052cc;
+  --accent-soft: rgb(0 102 255 / 12%);
+  --on-accent: #fff;
+}
+
 * {
   box-sizing: border-box;
 }

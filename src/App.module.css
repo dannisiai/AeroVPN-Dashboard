@@ -3,6 +3,11 @@
   height: 100%;
 }
 
+.aero {
+  color: var(--text);
+  background: var(--bg);
+}
+
 .mobile-topbar, .sidebar-scrim {
   display: none;
 }
@@ -26,10 +31,99 @@
   padding: 0 var(--space-10) var(--space-14);
 }
 
+.brand-logo {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  padding: 7px;
+  object-fit: contain;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+}
+
+.brand-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brand-name {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sidebar-brand-version {
   composes: text-mono-caption from global;
   color: var(--text-faint);
   letter-spacing: 0;
+}
+
+.aero .sidebar {
+  gap: var(--space-4);
+  padding: var(--space-20) var(--space-14) var(--space-14);
+}
+
+.aero .sidebar-brand {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+  padding: 0 var(--space-6) var(--space-14);
+}
+
+.aero .sidebar-brand-version {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: -0.02em;
+}
+
+.profile-summary {
+  display: flex;
+  gap: var(--space-10);
+  align-items: center;
+  min-width: 0;
+  padding: var(--space-10);
+  margin: 0 var(--space-2) var(--space-8);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.profile-summary-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-radius: 11px;
+}
+
+.profile-summary-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-summary-label {
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.profile-summary-name {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav-item {
@@ -159,6 +253,10 @@
   overscroll-behavior: none;
 }
 
+.aero .content {
+  scrollbar-gutter: auto;
+}
+
 .nav-item:active {
   background: var(--accent-soft);
 }
@@ -223,6 +321,19 @@
   display: none;
   flex-shrink: 0;
   -webkit-app-region: drag;
+}
+
+:global(.aero-invite-code) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  color: #1c1917;
+  background: #faf9f5;
+  border: 1px solid #e2ddd1;
+  border-radius: 10px;
 }
 
 :global(body[data-platform="darwin"]) .sidebar-titlebar {

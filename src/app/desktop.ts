@@ -1,12 +1,25 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import type { Transport } from "@connectrpc/connect";
+import type {
+  AeroAccountSnapshot,
+  AeroConnectSessionSnapshot,
+  AeroConnectionSnapshot,
+  AeroRegionSnapshot,
+} from "../../../src/shared/ipc";
 
 import type { StreamSnapshot } from "../api/stream";
 import type { NetworkQualityTestProgress, STUNTestProgress } from "../gen/daemon/started_service_pb";
 import type { PreferenceStorage } from "../lib/storage";
 import { showError } from "./errorStore";
 import { useLatestRef } from "./useLatest";
+
+export type {
+  AeroAccountSnapshot,
+  AeroConnectSessionSnapshot,
+  AeroConnectionSnapshot,
+  AeroRegionSnapshot,
+} from "../../../src/shared/ipc";
 
 export type DaemonConnectionPhase =
   | "connecting"
@@ -201,9 +214,26 @@ export interface DesktopTaildropSendRequest {
 
 export interface DesktopHost {
   platform: string;
+  managedMode: boolean;
   appVersion(): Promise<string>;
   transport: Transport;
   preferences: PreferenceStorage;
+  auth: {
+    restore(): Promise<AeroAccountSnapshot | null>;
+    sendVerificationCode(email: string): Promise<void>;
+    register(email: string, password: string, code: string): Promise<void>;
+    login(email: string, password: string): Promise<AeroAccountSnapshot>;
+    forgotPassword(email: string): Promise<void>;
+    resetPassword(email: string, code: string, newPassword: string): Promise<void>;
+    refreshAccount(): Promise<AeroAccountSnapshot>;
+    getRegions(): Promise<AeroRegionSnapshot[]>;
+    activeConnection(): Promise<AeroConnectionSnapshot | null>;
+    connect(regionId: string, cityId: string): Promise<AeroConnectionSnapshot>;
+    disconnect(): Promise<void>;
+    listConnectSessions(): Promise<AeroConnectSessionSnapshot[]>;
+    revokeConnectSession(sessionId: string): Promise<void>;
+    logout(): Promise<void>;
+  };
   daemon: {
     getState(): Promise<DaemonConnectionState>;
     onStateChanged(listener: (state: DaemonConnectionState) => void): () => void;
@@ -364,6 +394,39 @@ export interface DesktopHost {
   onImportRemoteProfile(listener: (request: { name: string; url: string }) => void): () => void;
   onImportProfileFile(listener: (request: { fileName: string; data: Uint8Array }) => void): () => void;
   onTaildropSendRequested(listener: (files: DesktopTaildropFile[]) => void): () => void;
+}
+
+export async function startDesktopService(host: DesktopHost): Promise<void> {
+  if (!host.managedMode) {
+    return host.service.start();
+  }
+
+  const [active, regions] = await Promise.all([
+    host.auth.activeConnection(),
+    host.auth.getRegions(),
+  ]);
+  const storedRegionId = window.localStorage.getItem("aerovpn.selected-region");
+  const storedCityId = window.localStorage.getItem("aerovpn.selected-city");
+  const preferredRegion = active === null ? null : regions.find((region) => region.id === active.regionId);
+  const storedRegion = regions.find((candidate) => candidate.id === storedRegionId);
+  const region = preferredRegion ?? storedRegion ?? regions.find((candidate) => candidate.recommended) ?? regions[0];
+  if (region === undefined) {
+    throw new Error("No server regions are currently available.");
+  }
+  const city = preferredRegion?.cities.find((candidate) => candidate.id === active?.cityId)
+    ?? storedRegion?.cities.find((candidate) => candidate.id === storedCityId)
+    ?? region.cities[0];
+  if (city === undefined) {
+    throw new Error("No server cities are currently available in this region.");
+  }
+  await host.auth.connect(region.id, city.id);
+}
+
+export async function stopDesktopService(host: DesktopHost): Promise<void> {
+  if (host.managedMode) {
+    return host.auth.disconnect();
+  }
+  return host.service.stop();
 }
 
 export const DesktopHostContext = createContext<DesktopHost | null>(null);

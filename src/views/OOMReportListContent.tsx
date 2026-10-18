@@ -8,6 +8,7 @@ import type {
   DesktopOOMReport,
   DesktopSettingsState,
 } from "../app/desktop";
+import { startDesktopService } from "../app/desktop";
 import { showError } from "../app/errorStore";
 import { useI18n } from "../app/i18n";
 import { Icon } from "../components/Icon";
@@ -67,7 +68,7 @@ export function OOMReportListContent({ host }: { host: DesktopHost }) {
     }
     setSettings({ ...settings, ...update });
     save()
-      .then(() => (started ? host.service.start() : undefined))
+      .then(() => (started ? startDesktopService(host) : undefined))
       .catch(showError);
   };
 

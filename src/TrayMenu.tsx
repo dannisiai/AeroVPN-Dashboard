@@ -12,7 +12,7 @@ import {
   loadThemePreference,
   watchSystemTheme,
 } from "./app/context";
-import { useDaemonConnection, useDesktopProfiles } from "./app/desktop";
+import { startDesktopService, stopDesktopService, useDaemonConnection, useDesktopProfiles } from "./app/desktop";
 import type { DesktopHost } from "./app/desktop";
 import { dismissError, showError, useCurrentError } from "./app/errorStore";
 import { I18nProvider, useI18n } from "./app/i18n";
@@ -195,7 +195,7 @@ function TrayMenuContent(props: { host: DesktopHost }) {
 
   const toggleService = (value: boolean) => {
     setBusy(true);
-    (value ? host.service.start() : host.service.stop())
+    (value ? startDesktopService(host) : stopDesktopService(host))
       .catch(showError)
       .finally(() => {
         api.serviceStatus.reconnectNow();
@@ -213,8 +213,9 @@ function TrayMenuContent(props: { host: DesktopHost }) {
   };
 
   const cascade =
-    controller.activeKey === null ? null : (
-      controller.activeKey === PROFILES_SUBMENU ? (
+    controller.activeKey === null ||
+    (host.managedMode && controller.activeKey === PROFILES_SUBMENU) ? null : (
+      controller.activeKey === PROFILES_SUBMENU && !host.managedMode ? (
         <div
           className={styles.submenu}
           data-tray-cascade-level="1"
@@ -258,7 +259,7 @@ function TrayMenuContent(props: { host: DesktopHost }) {
               <Switch
                 label={t("Service")}
                 value={switchOn}
-                disabled={busy || transitioning || (!switchOn && profiles.length === 0)}
+                disabled={busy || transitioning || (!host.managedMode && !switchOn && profiles.length === 0)}
                 onChange={toggleService}
               />
             ) : (
@@ -283,14 +284,16 @@ function TrayMenuContent(props: { host: DesktopHost }) {
               />
             </div>
           )}
-          <div className={styles.section}>
-            <ParentRow
-              menuKey={PROFILES_SUBMENU}
-              label={t("Profiles")}
-              detail={profiles.find((profile) => profile.id === selectedId)?.name ?? ""}
-              controller={controller}
-            />
-          </div>
+          {!host.managedMode && (
+            <div className={styles.section}>
+              <ParentRow
+                menuKey={PROFILES_SUBMENU}
+                label={t("Profiles")}
+                detail={profiles.find((profile) => profile.id === selectedId)?.name ?? ""}
+                controller={controller}
+              />
+            </div>
+          )}
           <div className={styles.section}>
             <button
               type="button"

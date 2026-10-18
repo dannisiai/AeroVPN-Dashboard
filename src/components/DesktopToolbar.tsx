@@ -6,7 +6,7 @@ import { formatUptime } from "../api/format";
 import { useStream } from "../api/stream";
 import { useApi, useNow } from "../app/context";
 import type { DesktopHost } from "../app/desktop";
-import { useDesktopProfiles } from "../app/desktop";
+import { startDesktopService, stopDesktopService, useDesktopProfiles } from "../app/desktop";
 import { showError } from "../app/errorStore";
 import { useUnaryOnce } from "../app/hooks";
 import { useI18n } from "../app/i18n";
@@ -24,9 +24,16 @@ export function DesktopToolbar(props: {
   leadRef?: (element: HTMLElement | null) => void;
   endRef?: (element: HTMLElement | null) => void;
   window?: boolean;
+  aeroHome?: boolean;
 }) {
   return (
-    <header className={cx(styles.toolbar, props.window && styles.toolbarWindow)}>
+    <header
+      className={cx(
+        styles.toolbar,
+        props.window && styles.toolbarWindow,
+        props.aeroHome && styles.toolbarAeroHome,
+      )}
+    >
       <div className={styles.toolbarSection}>
         {props.picker}
         {props.controls}
@@ -100,7 +107,7 @@ export function DesktopServiceControls(props: { host: DesktopHost }) {
           className={styles.toolbarServiceButton}
           title={t("Stop")}
           disabled={busy}
-          onClick={() => run(() => host.service.stop())}
+          onClick={() => run(() => stopDesktopService(host))}
         >
           <ToolbarUptime />
           <Icon name="stop" />
@@ -108,8 +115,8 @@ export function DesktopServiceControls(props: { host: DesktopHost }) {
       ) : (
         <IconButton
           title={t("Start")}
-          disabled={busy || profiles.length === 0}
-          onClick={() => run(() => host.service.start())}
+          disabled={busy || (!host.managedMode && profiles.length === 0)}
+          onClick={() => run(() => startDesktopService(host))}
         >
           <Icon name="play_arrow" />
         </IconButton>

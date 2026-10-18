@@ -11,6 +11,12 @@
   -webkit-app-region: drag;
 }
 
+.toolbar-aero-home {
+  height: 32px;
+  background: transparent;
+  border-bottom: 0;
+}
+
 :global(body[data-platform="darwin"]) .toolbar-window {
   --titlebar-inset: 96px;
 

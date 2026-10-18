@@ -46,12 +46,13 @@ const STUN_DEFAULT_SERVER = "stun.voipgate.com:3478";
 export function ToolsView() {
   const api = useApi();
   const { t } = useI18n();
+  const localHost = useLocalDesktopHost();
   const serviceStatus = useStream(api.serviceStatus);
   const started = serviceStatus.data.status?.status === ServiceStatus_Type.STARTED;
 
   return (
     <div className="page">
-      <PageHeader title={t("Tools")} />
+      <PageHeader title={t(localHost !== null ? "More" : "Tools")} />
       <div className="settings-stack">
         {started && <EndpointRows />}
         {started && <UsbipServerRows />}
@@ -307,12 +308,13 @@ function UsbipServerRows() {
 }
 
 export function ToolsPageHeader(props: { title: string; actions?: ReactNode }) {
+  const host = useLocalDesktopHost();
   const { t } = useI18n();
   return (
     <PageHeader
       title={props.title}
       actions={props.actions}
-      back={{ label: t("Tools"), onClick: () => navigate("tools") }}
+      back={{ label: t(host !== null ? "More" : "Tools"), onClick: () => navigate("tools") }}
     />
   );
 }

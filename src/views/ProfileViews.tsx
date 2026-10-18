@@ -174,71 +174,91 @@ export function ProfileCard(props: { host: DesktopHost }) {
       title={t("Profile")}
       wide
       actions={
-        <OthersMenu icon="add">
-          <MenuItem icon="download" onSelect={importFromFile}>
-            {t("Import from File")}
-          </MenuItem>
-          <MenuItem icon="edit" onSelect={() => setCreating(true)}>
-            {t("Create Manually")}
-          </MenuItem>
-        </OthersMenu>
+        host.managedMode ? undefined : (
+          <OthersMenu icon="add">
+            <MenuItem icon="download" onSelect={importFromFile}>
+              {t("Import from File")}
+            </MenuItem>
+            <MenuItem icon="edit" onSelect={() => setCreating(true)}>
+              {t("Create Manually")}
+            </MenuItem>
+          </OthersMenu>
+        )
       }
     >
       {profiles.length === 0 ? (
         <p className={styles.profileEmpty}>{t("Empty profiles")}</p>
       ) : (
         <>
-          <button type="button" className={styles.profileSelector} onClick={() => setPicking(true)}>
-            <span className={styles.profileSelectorName}>
-              {selected?.name ?? t("Select Profile")}
-            </span>
-            <Icon name="unfold_more" size={16} />
-          </button>
+          {host.managedMode ? (
+            <div
+              className={styles.profileSelector}
+              aria-label={t("Profiles are managed by AeroVPN.")}
+            >
+              <span className={styles.profileSelectorName}>{selected?.name ?? t("Select Profile")}</span>
+            </div>
+          ) : (
+            <button type="button" className={styles.profileSelector} onClick={() => setPicking(true)}>
+              <span className={styles.profileSelectorName}>
+                {selected?.name ?? t("Select Profile")}
+              </span>
+              <Icon name="unfold_more" size={16} />
+            </button>
+          )}
           {selected !== null && (
             <>
               <div className={styles.profileMeta}>
                 <ProfileInfo profile={selected} />
               </div>
-              <div className={cx("row-actions", styles.profileActions)}>
-                <IconButton title={t("Edit")} onClick={() => setEditing(true)}>
-                  <Icon name="edit" size={16} />
-                </IconButton>
-                {selected.type === "remote" && (
-                  <IconButton title={t("Update")} disabled={updating} onClick={updateRemote}>
-                    <span className={updating ? styles.spin : undefined}>
-                      <Icon name="sync" size={16} />
-                    </span>
+              {!host.managedMode && (
+                <div className={cx("row-actions", styles.profileActions)}>
+                  <IconButton title={t("Edit")} onClick={() => setEditing(true)}>
+                    <Icon name="edit" size={16} />
                   </IconButton>
-                )}
-                <OthersMenu icon="share">
-                  <ShareMenuItems
-                    host={host}
-                    profile={selected}
-                    onShowQR={() => setShowingQR(true)}
-                    onShowQRS={() => setShowingQRS(true)}
-                  />
-                </OthersMenu>
-              </div>
+                  {selected.type === "remote" && (
+                    <IconButton title={t("Update")} disabled={updating} onClick={updateRemote}>
+                      <span className={updating ? styles.spin : undefined}>
+                        <Icon name="sync" size={16} />
+                      </span>
+                    </IconButton>
+                  )}
+                  <OthersMenu icon="share">
+                    <ShareMenuItems
+                      host={host}
+                      profile={selected}
+                      onShowQR={() => setShowingQR(true)}
+                      onShowQRS={() => setShowingQRS(true)}
+                    />
+                  </OthersMenu>
+                </div>
+              )}
             </>
           )}
         </>
       )}
-      {picking && <ProfilePickerDialog host={host} onClose={() => setPicking(false)} />}
-      {creating && <CreateProfileDialog host={host} onClose={() => setCreating(false)} />}
-      {importRequest !== null && (
+      {host.managedMode && (
+        <p className={styles.profileEmpty}>{t("Profiles are managed by AeroVPN.")}</p>
+      )}
+      {!host.managedMode && picking && (
+        <ProfilePickerDialog host={host} onClose={() => setPicking(false)} />
+      )}
+      {!host.managedMode && creating && (
+        <CreateProfileDialog host={host} onClose={() => setCreating(false)} />
+      )}
+      {!host.managedMode && importRequest !== null && (
         <ProfileImportDialog
           host={host}
           request={importRequest}
           onClose={() => setImportRequest(null)}
         />
       )}
-      {editing && selected !== null && (
+      {!host.managedMode && editing && selected !== null && (
         <EditProfileDialog host={host} profile={selected} onClose={() => setEditing(false)} />
       )}
-      {showingQR && selected !== null && (
+      {!host.managedMode && showingQR && selected !== null && (
         <ProfileQRDialog profile={selected} onClose={() => setShowingQR(false)} />
       )}
-      {showingQRS && selected !== null && (
+      {!host.managedMode && showingQRS && selected !== null && (
         <ProfileQRSDialog host={host} profile={selected} onClose={() => setShowingQRS(false)} />
       )}
     </Card>

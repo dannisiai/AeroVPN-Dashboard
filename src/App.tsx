@@ -34,6 +34,7 @@ import {
   useDesktopHost,
   useLocalDesktopHost,
   useRemoteSession,
+  type AeroAccountSnapshot,
   type DesktopHost,
 } from "./app/desktop";
 import { loadDisableDeprecatedWarnings } from "./app/deprecatedWarnings";
@@ -52,6 +53,7 @@ import { Brand, Button, Dialog, IconButton, Spinner, StateDot } from "./componen
 import { SSH_DEFAULT_TERMINAL_TYPE, SSH_DEFAULT_USERNAME } from "./lib/tailscaleSSH";
 import { loadStoredString, saveStoredString } from "./lib/storage";
 import { ConnectionErrorView } from "./views/ConnectionErrorView";
+import { AeroSidebar } from "./views/AeroSidebar";
 import { ConnectionsView } from "./views/ConnectionsView";
 import { DesktopSetupView } from "./views/DesktopSetupView";
 import {
@@ -80,9 +82,17 @@ import {
   powerReportTitle,
 } from "./views/reportFormat";
 import { OverviewView } from "./views/OverviewView";
+import { AeroHomeView } from "./views/AeroHomeView";
+import { AeroAccountView } from "./views/AeroAccountView";
+import { AeroLoginView } from "./views/AeroLoginView";
+import { AeroMoreView } from "./views/AeroMoreView";
+import { AeroSettingsView } from "./views/AeroSettingsView";
+import { AeroDesktopSetupView } from "./views/AeroDesktopSetupView";
+import { AeroFaqView } from "./views/AeroFaqView";
 import {
   ImportProfileFileDialog,
   ImportRemoteProfileDialog,
+  ProfileCard,
   ProfileContentWindow,
 } from "./views/ProfileViews";
 import {
@@ -109,6 +119,9 @@ import { cx } from "./lib/cx";
 
 export type Route =
   | { page: "overview" }
+  | { page: "account" }
+  | { page: "faq" }
+  | { page: "profiles" }
   | { page: "groups" }
   | { page: "connections" }
   | { page: "logs" }
@@ -154,6 +167,12 @@ function routeFromHash(locationHash: string): Route {
       }
     });
   switch (segments[0]) {
+    case "account":
+      return { page: "account" };
+    case "faq":
+      return { page: "faq" };
+    case "profiles":
+      return { page: "profiles" };
     case "profile-editor":
       if (segments[1]) {
         return {
@@ -302,10 +321,16 @@ function isLocalReportsPage(page: string): boolean {
   );
 }
 
-function routeTitle(route: Route, t: Translate, language: string): string {
+function routeTitle(route: Route, t: Translate, language: string, aero: boolean): string {
   switch (route.page) {
     case "overview":
-      return t("Dashboard");
+      return aero ? t("Home") : t("Dashboard");
+    case "account":
+      return t("Account & Subscription");
+    case "faq":
+      return t("FAQ");
+    case "profiles":
+      return t("Profiles");
     case "groups":
       return t("Groups");
     case "connections":
@@ -313,7 +338,7 @@ function routeTitle(route: Route, t: Translate, language: string): string {
     case "logs":
       return t("Logs");
     case "tools":
-      return t("Tools");
+      return aero ? t("More") : t("Tools");
     case "tools/network-quality":
       return t("Network Quality");
     case "tools/stun":
@@ -321,7 +346,7 @@ function routeTitle(route: Route, t: Translate, language: string): string {
     case "tools/tailscale":
       return route.tag !== "" ? t("Tailscale: {tag}", { tag: route.tag }) : "Tailscale";
     case "tools/tailscale/ssh":
-      return t("Tools");
+      return aero ? t("More") : t("Tools");
     case "tools/tailscale/taildrop":
       return "Taildrop";
     case "tools/usbip":
@@ -525,6 +550,29 @@ function DesktopApp(props: { host: DesktopHost }) {
   const [activeId, setActiveId] = useState<string>(
     () => loadStoredString(DESKTOP_ACTIVE_KEY) ?? DESKTOP_LOCAL_SERVER.id,
   );
+  const [aeroAccount, setAeroAccount] = useState<AeroAccountSnapshot | null | undefined>(undefined);
+  const [authRestoreError, setAuthRestoreError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let stale = false;
+    void host.auth
+      .restore()
+      .then((account) => {
+        if (!stale) {
+          setAeroAccount(account);
+          setAuthRestoreError(null);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!stale) {
+          setAeroAccount(null);
+          setAuthRestoreError(error instanceof Error ? error.message : String(error));
+        }
+      });
+    return () => {
+      stale = true;
+    };
+  }, [host]);
 
   useEffect(() => {
     document.body.dataset.platform = host.platform;
@@ -566,6 +614,40 @@ function DesktopApp(props: { host: DesktopHost }) {
     );
   }
 
+  if (local && aeroAccount === undefined) {
+    return (
+      <div className={styles.desktopRoot}>
+        <DesktopToolbar window aeroHome />
+        <div className={styles.desktopConnectingView}>
+          <Spinner className={styles.connectingSpinner} />
+        </div>
+      </div>
+    );
+  }
+
+  if (local && aeroAccount === null) {
+    return (
+      <div className={styles.desktopRoot}>
+        <DesktopToolbar window aeroHome />
+        <AeroLoginView
+          host={host}
+          initialError={authRestoreError}
+          onAuthenticated={(account) => {
+            setAuthRestoreError(null);
+            setAeroAccount(account);
+            navigate("overview");
+          }}
+        />
+      </div>
+    );
+  }
+
+  const logout = async () => {
+    await host.auth.logout();
+    setAeroAccount(null);
+    navigate("overview");
+  };
+
   if (local && connection.phase !== "connected") {
     if (!connectionHasResolved) {
       return (
@@ -578,13 +660,24 @@ function DesktopApp(props: { host: DesktopHost }) {
     }
     return (
       <div className={styles.desktopRoot}>
-        <DesktopToolbar window picker={picker} />
-        <DesktopSetupView
-          host={host}
-          state={connection}
-          serversState={state.serversState}
-          onSelectServer={(server) => selectServer(server.id)}
-        />
+        <DesktopToolbar window={local} aeroHome={local} picker={local ? undefined : picker} />
+        {local ? (
+          <AeroDesktopSetupView
+            host={host}
+            state={connection}
+            page={state.route.page}
+            account={aeroAccount!}
+            onAccountUpdated={setAeroAccount}
+            onLogout={logout}
+          />
+        ) : (
+          <DesktopSetupView
+            host={host}
+            state={connection}
+            serversState={state.serversState}
+            onSelectServer={(server) => selectServer(server.id)}
+          />
+        )}
         <UpdatesGate host={host} />
       </div>
     );
@@ -614,6 +707,9 @@ function DesktopApp(props: { host: DesktopHost }) {
         onThemeChange={state.updateTheme}
         accent={state.accent}
         onAccentChange={state.updateAccent}
+        aeroAccount={local ? aeroAccount : undefined}
+        onAccountUpdated={local ? setAeroAccount : undefined}
+        onLogout={local ? logout : undefined}
       />
       <UpdatesGate host={host} />
     </div>
@@ -658,6 +754,9 @@ interface ShellProps {
   onThemeChange: (theme: ThemePreference) => void;
   accent: AccentPreference;
   onAccentChange: (accent: AccentPreference) => void;
+  aeroAccount?: AeroAccountSnapshot | null;
+  onAccountUpdated?: (account: AeroAccountSnapshot) => void;
+  onLogout?: () => Promise<void>;
 }
 
 function Shell(props: ShellProps) {
@@ -690,9 +789,20 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
   const serviceStatus = useStream(api.serviceStatus);
   const groups = useStream(api.groups);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [leadSlot, setLeadSlot] = useState<HTMLElement | null>(null);
   const [endSlot, setEndSlot] = useState<HTMLElement | null>(null);
   const reportedFatalError = useRef<string | null>(null);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (localHost === null) {
+      root.removeAttribute("data-aero-app");
+      return;
+    }
+    root.dataset.aeroApp = "true";
+    return () => root.removeAttribute("data-aero-app");
+  }, [localHost]);
 
   const serviceStatusType = serviceStatus.data.status?.status;
   const fatalError =
@@ -768,6 +878,8 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
     }
     const invisible =
       (route.page === "groups" && (!started || (groupsKnown && !hasGroups))) ||
+      (route.page === "profiles" && localHost === null) ||
+      ((route.page === "account" || route.page === "faq") && localHost === null) ||
       (route.page === "connections" && !started) ||
       (isStartedOnlyToolsSubpage(route.page) && !started) ||
       (route.page === "tools/usbip" && capabilities.ready && !capabilities.supports("usbip")) ||
@@ -855,7 +967,7 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
       {navItem("logs", t("Logs"), "text_snippet", route.page === "logs")}
       {navItem(
         "tools",
-        t("Tools"),
+        t(localHost !== null ? "More" : "Tools"),
         "terminal",
         route.page.startsWith("tools"),
         started && capabilities.supports("taildrop") ? <TaildropNavBadge /> : undefined,
@@ -866,11 +978,26 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
 
   const mainContent = (
     <main className={styles.content}>
-      {route.page === "overview" && <OverviewView />}
+      {route.page === "overview" &&
+        (localHost !== null && props.aeroAccount !== null && props.aeroAccount !== undefined
+          ? <AeroHomeView host={localHost} account={props.aeroAccount} />
+          : <OverviewView />)}
+      {route.page === "account" && localHost !== null && props.aeroAccount && props.onLogout && (
+        <AeroAccountView
+          host={localHost}
+          account={props.aeroAccount}
+          onAccountUpdated={props.onAccountUpdated}
+          onLogout={async () => {
+            await props.onLogout?.();
+          }}
+        />
+      )}
+      {route.page === "faq" && localHost !== null && <AeroFaqView />}
+      {route.page === "profiles" && localHost !== null && <ProfilesPage host={localHost} />}
       {route.page === "groups" && <GroupsView />}
       {route.page === "connections" && <ConnectionsView />}
       {route.page === "logs" && <LogsView />}
-      {route.page === "tools" && <ToolsView />}
+      {route.page === "tools" && (localHost !== null ? <AeroMoreView onOpenTools={() => navigate("tools/network-quality")} /> : <ToolsView />)}
       {route.page === "tools/network-quality" && <NetworkQualityView />}
       {route.page === "tools/stun" && <STUNTestView />}
       {route.page === "tools/tailscale" && <TailscaleEndpointView tag={route.tag} />}
@@ -899,7 +1026,7 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
       {route.page === "tools/power-reports/file" && (
         <PowerReportFileView name={route.name} file={route.file} recordedAt={route.recordedAt} />
       )}
-      {route.page === "settings" && <SettingsView />}
+      {route.page === "settings" && (localHost !== null ? <AeroSettingsView host={localHost} /> : <SettingsView />)}
       {route.page === "settings/app" && (
         <AppSettingsView
           theme={props.theme}
@@ -932,7 +1059,7 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
 
   return (
     <CapabilitiesContext.Provider value={capabilities}>
-      <div className={styles.app}>
+      <div className={cx(styles.app, localHost !== null && styles.aero)}>
         {host === null && (
           <header className={styles.mobileTopbar}>
             <IconButton
@@ -953,7 +1080,29 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
             onClick={() => setMenuOpen(false)}
           />
         )}
-        {host !== null ? (
+        {localHost !== null ? (
+          <AeroSidebar
+            windowTitlebarInset
+            activePage={
+              route.page === "overview"
+                ? "home"
+                : route.page === "account"
+                  ? "store"
+                  : route.page === "faq"
+                    ? "home"
+                  : route.page.startsWith("settings")
+                    ? "settings"
+                    : "more"
+            }
+            onNavigate={(destination) => {
+              setMenuOpen(false);
+              navigate(destination);
+            }}
+            onInvite={() => setInviteOpen(true)}
+            accountTitle={props.aeroAccount?.email}
+            membershipLabel={props.aeroAccount?.plan?.name || t("Not subscribed")}
+          />
+        ) : host !== null ? (
           <nav className={styles.sidebar}>
             <div className={styles.sidebarTitlebar} />
             <div className={styles.sidebarBrand}>
@@ -977,7 +1126,12 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
               sing-box
               {serverInfo && <span className={styles.sidebarBrandVersion}>{serverInfo.version}</span>}
             </div>
-            {navItem("overview", t("Overview"), "dashboard", route.page === "overview")}
+            {navItem(
+              "overview",
+              t(started ? "Overview" : "Dashboard"),
+              "dashboard",
+              route.page === "overview",
+            )}
             {hasGroups && navItem("groups", t("Groups"), "folder", route.page === "groups")}
             {started && navItem("connections", t("Connections"), "swap_vert", route.page === "connections")}
             {mainPages}
@@ -992,6 +1146,7 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
         {host !== null ? (
           <div className={styles.contentColumn}>
             <DesktopToolbar
+              aeroHome={localHost !== null}
               title={
                 route.page === "tools/tailscale" ? (
                   <EndpointToolbarTitle
@@ -1025,14 +1180,16 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
                     title="OpenVPN"
                     taggedTitle={`OpenVPN: ${route.tag}`}
                   />
+                ) : localHost !== null ? undefined : localHost !== null && route.page === "profiles" ? (
+                  t("Store")
                 ) : (
-                  routeTitle(route, t, language)
+                  routeTitle(route, t, language, localHost !== null)
                 )
               }
               picker={props.desktopPicker}
               controls={
                 props.desktopLocal === true ? (
-                  <DesktopServiceControls host={host} />
+                  localHost === null ? <DesktopServiceControls host={host} /> : undefined
                 ) : onExitRemote !== undefined ? (
                   <DesktopRemoteControls onDisconnect={() => onExitRemote()} />
                 ) : undefined
@@ -1054,11 +1211,40 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
           </div>
         )}
         {started && <DeprecatedWarningsGate />}
-        {localHost !== null && <ImportRemoteProfileDialog host={localHost} />}
-        {localHost !== null && <ImportProfileFileDialog host={localHost} />}
+        {inviteOpen && <AeroInviteDialog onClose={() => setInviteOpen(false)} />}
+        {localHost !== null && !localHost.managedMode && <ImportRemoteProfileDialog host={localHost} />}
+        {localHost !== null && !localHost.managedMode && <ImportProfileFileDialog host={localHost} />}
         {localHost !== null && <TaildropSendRequestDialog host={localHost} />}
       </div>
     </CapabilitiesContext.Provider>
+  );
+}
+
+function ProfilesPage(props: { host: DesktopHost }) {
+  const { t } = useI18n();
+  return (
+    <section className="page">
+      <header className="page-header">
+        <h1 className="page-title">{t("Profiles")}</h1>
+      </header>
+      <ProfileCard host={props.host} />
+    </section>
+  );
+}
+
+function AeroInviteDialog(props: { onClose: () => void }) {
+  const { t } = useI18n();
+
+  return (
+    <Dialog onClose={props.onClose}>
+      <h3>{t("Invite & Earn")}</h3>
+      <div className="dialog-message">
+        <p>{t("Referral features are not available from the current account API.")}</p>
+      </div>
+      <div className="row-actions dialog-actions">
+        <Button variant="primary" onClick={props.onClose}>{t("Ok")}</Button>
+      </div>
+    </Dialog>
   );
 }
 
