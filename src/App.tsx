@@ -997,7 +997,7 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
       {route.page === "groups" && <GroupsView />}
       {route.page === "connections" && <ConnectionsView />}
       {route.page === "logs" && <LogsView />}
-      {route.page === "tools" && (localHost !== null ? <AeroMoreView onOpenTools={() => navigate("tools/network-quality")} /> : <ToolsView />)}
+      {route.page === "tools" && (localHost !== null ? <AeroMoreView /> : <ToolsView />)}
       {route.page === "tools/network-quality" && <NetworkQualityView />}
       {route.page === "tools/stun" && <STUNTestView />}
       {route.page === "tools/tailscale" && <TailscaleEndpointView tag={route.tag} />}

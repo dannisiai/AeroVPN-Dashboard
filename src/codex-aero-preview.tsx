@@ -128,7 +128,7 @@ function Preview() {
       <main className="preview-main">
         {page === "home" && <AeroHomeView host={demoHost} account={demoAccount} />}
         {page === "account" && <AeroAccountView host={demoHost} account={demoAccount} onLogout={async () => {}} />}
-        {page === "more" && <AeroMoreView onOpenTools={() => setPage("more")} />}
+        {page === "more" && <AeroMoreView />}
         {page === "settings" && <AeroSettingsView host={demoHost} />}
         {page === "faq" && <AeroFaqView />}
         {page === "profiles" && <section className="page"><header className="page-header"><h1>配置</h1></header><ProfileCard host={demoHost} /></section>}

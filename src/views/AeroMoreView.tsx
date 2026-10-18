@@ -5,9 +5,9 @@ import { AeroIcon, type AeroIconName } from "../components/AeroIcon";
 import { Dialog } from "../components/ui";
 import styles from "./AeroPages.module.css";
 
-type MoreAction = "agent" | "website" | "orders" | "support" | "channel" | "tickets" | "tools";
+type MoreAction = "agent" | "website" | "orders" | "support" | "channel" | "tickets";
 
-const actionDetails: Record<Exclude<MoreAction, "tools">, { title: string; icon: AeroIconName; color: string; body: string }> = {
+const actionDetails: Record<MoreAction, { title: string; icon: AeroIconName; color: string; body: string }> = {
   agent: { title: "申请代理合作", icon: "handshake", color: "#16a34a", body: "欢迎加入 AeroVPN 商业分销伙伴网络。商务合作：Telegram @AeroVPN_Partner · partner@aerovpn.com" },
   website: { title: "官方网站", icon: "public", color: "#ea580c", body: "AeroVPN 官方主站：https://aerovpn.com" },
   orders: { title: "我的订单记录", icon: "receipt", color: "#57534e", body: "当前账户 API 尚未提供订单查询接口。" },
@@ -16,13 +16,13 @@ const actionDetails: Record<Exclude<MoreAction, "tools">, { title: string; icon:
   tickets: { title: "工单列表", icon: "confirmation_number", color: "#9333ea", body: "当前账户 API 尚未提供工单查询接口。" },
 };
 
-export function AeroMoreView(props: { onOpenTools: () => void }) {
+export function AeroMoreView() {
   const { t } = useI18n();
   const [dialog, setDialog] = useState<MoreAction | null>(null);
-  const details = dialog !== null && dialog !== "tools" ? actionDetails[dialog] : null;
+  const details = dialog === null ? null : actionDetails[dialog];
 
   const row = (id: MoreAction, title: string, icon: AeroIconName) => (
-    <button type="button" key={id} className={styles.moreRow} onClick={() => id === "tools" ? props.onOpenTools() : setDialog(id)}>
+    <button type="button" key={id} className={styles.moreRow} onClick={() => setDialog(id)}>
       <span className={styles.rowIcon}><AeroIcon name={icon} size={23} /></span>
       <strong>{title}</strong>
       <AeroIcon name="keyboard_arrow_right" size={22} />
@@ -51,8 +51,6 @@ export function AeroMoreView(props: { onOpenTools: () => void }) {
           {row("tickets", t("Support Tickets"), "confirmation_number")}
         </div>
 
-        <h2 className={styles.listSectionTitle}>{t("AeroVPN")}</h2>
-        <div className={styles.listCard}>{row("tools", t("Core tools"), "settings")}</div>
       </div>
 
       {details && (

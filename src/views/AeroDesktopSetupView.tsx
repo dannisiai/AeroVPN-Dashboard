@@ -146,7 +146,7 @@ export function AeroDesktopSetupView(props: {
   if (page === "overview") content = renderHome();
   else if (page === "account") content = <AeroAccountView host={props.host} account={props.account} onAccountUpdated={props.onAccountUpdated} onLogout={props.onLogout} />;
   else if (page === "faq") content = <AeroFaqView />;
-  else if (page === "tools") content = <AeroMoreView onOpenTools={() => navigate("tools/network-quality")} />;
+  else if (page === "tools") content = <AeroMoreView />;
   else if (page === "settings") content = <AeroSettingsView host={props.host} />;
   else if (page === "profiles") {
     content = <section className={pageStyles.page}><header className={pageStyles.pageHeader}><h1>{t("Profiles")}</h1></header><div className={styles.profileBody}><ProfileCard host={props.host} /></div></section>;

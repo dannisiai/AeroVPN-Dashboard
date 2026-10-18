@@ -120,12 +120,6 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
           {row(t("About"), "info", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/app"))}
         </div>
 
-        <h2 className={styles.listSectionTitle}>{t("AeroVPN")}</h2>
-        <div className={styles.listCard}>
-          {row(t("Core settings"), "settings", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/core"))}
-          <div className={styles.rowDivider} />
-          {row(t("App settings"), "settings", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/app"))}
-        </div>
         <div className={styles.pageBottomSpace} />
       </div>
     </section>
