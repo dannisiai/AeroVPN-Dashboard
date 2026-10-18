@@ -14,7 +14,11 @@ import styles from "./AeroHomeView.module.css";
 const SELECTED_REGION_KEY = "aerovpn.selected-region";
 const SELECTED_CITY_KEY = "aerovpn.selected-city";
 
-export function AeroHomeView(props: { host: DesktopHost; account: AeroAccountSnapshot }) {
+export function AeroHomeView(props: {
+  host: DesktopHost;
+  account: AeroAccountSnapshot;
+  onAccountUpdated?: (account: AeroAccountSnapshot) => void;
+}) {
   const api = useApi();
   const { t } = useI18n();
   const serviceStatus = useStream(api.serviceStatus);
@@ -61,6 +65,16 @@ export function AeroHomeView(props: { host: DesktopHost; account: AeroAccountSna
     return () => { disposed = true; };
   }, [props.host]);
 
+  useEffect(() => {
+    let disposed = false;
+    void props.host.auth.refreshAccount()
+      .then((account) => {
+        if (!disposed) props.onAccountUpdated?.(account);
+      })
+      .catch(() => {});
+    return () => { disposed = true; };
+  }, [props.host, props.onAccountUpdated]);
+
   const selectedRegion = regions.find((region) => region.id === regionId) ?? null;
   const selectedCity = selectedRegion?.cities.find((city) => city.id === cityId) ?? selectedRegion?.cities[0] ?? null;
   const serviceType = serviceStatus.data.status?.status;
@@ -87,7 +101,7 @@ export function AeroHomeView(props: { host: DesktopHost; account: AeroAccountSna
     : plan.trafficGb <= 0
       ? t("Unlimited")
       : plan.trafficUsedGb === null
-        ? "—"
+        ? `${plan.trafficGb.toFixed(1)} GB`
         : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(1)} GB`;
 
   const displayCity = connection?.cityName ?? selectedCity?.name ?? t("Choose a region");

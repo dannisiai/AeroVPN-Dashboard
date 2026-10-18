@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-import { navigate } from "../app/context";
 import { loadAeroConnectionMode, saveAeroConnectionMode } from "../app/connectionMode";
 import { LanguageSelect, useI18n } from "../app/i18n";
 import type { AeroConnectionMode, DesktopHost } from "../app/desktop";
@@ -101,23 +100,6 @@ export function AeroSettingsView(props: { host: DesktopHost }) {
               ? t("Windows system proxy routes supported apps through AeroVPN. Apps that ignore system proxy settings are not covered.")
               : t("Connections use the managed TUN configuration."),
           )}
-          <div className={styles.rowDivider} />
-          {row(t("Kill Switch"), "shield", toggle(false, true, t("Kill Switch"), () => {}), t("This AeroVPN desktop build does not expose a kill-switch control."))}
-          <div className={styles.rowDivider} />
-          {row(t("Auto Connect"), "power_settings_new", toggle(false, true, t("Auto Connect"), () => {}), t("Automatic tunnel startup is not exposed by this build."))}
-          <div className={styles.rowDivider} />
-          {row(t("Bypass Local LAN"), "route", toggle(true, true, t("Bypass Local LAN"), () => {}), t("Private network traffic is routed directly in managed connection mode."))}
-        </div>
-
-        <h2 className={styles.listSectionTitle}>{t("Updates & Support")}</h2>
-        <div className={styles.listCard}>
-          {row(t("Check for Updates"), "system_update", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/app"))}
-          <div className={styles.rowDivider} />
-          {row(t("Terms of Service"), "description", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/app"))}
-          <div className={styles.rowDivider} />
-          {row(t("Privacy Policy"), "security", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/app"))}
-          <div className={styles.rowDivider} />
-          {row(t("About"), "info", <AeroIcon name="keyboard_arrow_right" size={22} />, undefined, () => navigate("settings/app"))}
         </div>
 
         <div className={styles.pageBottomSpace} />

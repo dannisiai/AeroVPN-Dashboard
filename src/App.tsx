@@ -678,7 +678,7 @@ function DesktopApp(props: { host: DesktopHost }) {
             onSelectServer={(server) => selectServer(server.id)}
           />
         )}
-        <UpdatesGate host={host} />
+        {!host.managedMode && <UpdatesGate host={host} />}
       </div>
     );
   }
@@ -711,7 +711,7 @@ function DesktopApp(props: { host: DesktopHost }) {
         onAccountUpdated={local ? setAeroAccount : undefined}
         onLogout={local ? logout : undefined}
       />
-      <UpdatesGate host={host} />
+      {!host.managedMode && <UpdatesGate host={host} />}
     </div>
   );
 }
@@ -867,6 +867,12 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
     setMenuOpen(false);
   }, [route]);
 
+  useEffect(() => {
+    if (localHost?.managedMode && route.page === "settings/app") {
+      navigate("settings");
+    }
+  }, [localHost, route.page]);
+
   const started = serviceStatusType === ServiceStatus_Type.STARTED;
   const hasGroups = started && groups.data.loaded && groups.data.groups.length > 0;
   const known = serviceStatus.phase !== "connecting" || serviceStatus.data.status !== null;
@@ -980,7 +986,7 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
     <main className={styles.content}>
       {route.page === "overview" &&
         (localHost !== null && props.aeroAccount !== null && props.aeroAccount !== undefined
-          ? <AeroHomeView host={localHost} account={props.aeroAccount} />
+          ? <AeroHomeView host={localHost} account={props.aeroAccount} onAccountUpdated={props.onAccountUpdated} />
           : <OverviewView />)}
       {route.page === "account" && localHost !== null && props.aeroAccount && props.onLogout && (
         <AeroAccountView
@@ -1028,12 +1034,14 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
       )}
       {route.page === "settings" && (localHost !== null ? <AeroSettingsView host={localHost} /> : <SettingsView />)}
       {route.page === "settings/app" && (
-        <AppSettingsView
-          theme={props.theme}
-          onThemeChange={props.onThemeChange}
-          accent={props.accent}
-          onAccentChange={props.onAccentChange}
-        />
+        localHost?.managedMode
+          ? <AeroSettingsView host={localHost} />
+          : <AppSettingsView
+              theme={props.theme}
+              onThemeChange={props.onThemeChange}
+              accent={props.accent}
+              onAccentChange={props.onAccentChange}
+            />
       )}
       {route.page === "settings/core" && <CoreView />}
       {route.page === "settings/preferences" && (

@@ -25,7 +25,7 @@ export type TranslateParams = Record<string, string | number>;
 export type Translate = (key: MessageKey, params?: TranslateParams) => string;
 
 function translate(language: Language, key: MessageKey, params?: TranslateParams): string {
-  let text = language === "en" ? key : (TRANSLATIONS[key]?.[language] ?? key);
+  let text: string = language === "en" ? key : (TRANSLATIONS[key]?.[language] ?? key);
   if (params) {
     for (const [name, value] of Object.entries(params)) {
       text = text.replaceAll(`{${name}}`, String(value));
