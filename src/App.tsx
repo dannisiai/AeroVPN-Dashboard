@@ -988,14 +988,11 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
         (localHost !== null && props.aeroAccount !== null && props.aeroAccount !== undefined
           ? <AeroHomeView host={localHost} account={props.aeroAccount} onAccountUpdated={props.onAccountUpdated} />
           : <OverviewView />)}
-      {route.page === "account" && localHost !== null && props.aeroAccount && props.onLogout && (
+      {route.page === "account" && localHost !== null && props.aeroAccount && (
         <AeroAccountView
           host={localHost}
           account={props.aeroAccount}
           onAccountUpdated={props.onAccountUpdated}
-          onLogout={async () => {
-            await props.onLogout?.();
-          }}
         />
       )}
       {route.page === "faq" && localHost !== null && <AeroFaqView />}
@@ -1032,10 +1029,10 @@ function ShellContent(props: ShellProps & { onRetry: () => void }) {
       {route.page === "tools/power-reports/file" && (
         <PowerReportFileView name={route.name} file={route.file} recordedAt={route.recordedAt} />
       )}
-      {route.page === "settings" && (localHost !== null ? <AeroSettingsView host={localHost} /> : <SettingsView />)}
+      {route.page === "settings" && (localHost !== null ? <AeroSettingsView host={localHost} onLogout={props.onLogout} /> : <SettingsView />)}
       {route.page === "settings/app" && (
         localHost?.managedMode
-          ? <AeroSettingsView host={localHost} />
+          ? <AeroSettingsView host={localHost} onLogout={props.onLogout} />
           : <AppSettingsView
               theme={props.theme}
               onThemeChange={props.onThemeChange}

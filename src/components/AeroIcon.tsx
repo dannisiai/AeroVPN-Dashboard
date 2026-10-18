@@ -25,6 +25,7 @@ export type AeroIconName =
   | "confirmation_number"
   | "language"
   | "route"
+  | "tune"
   | "shield"
   | "system_update"
   | "description"
@@ -68,6 +69,7 @@ const EXISTING_ICONS: Partial<Record<AeroIconName, IconName>> = {
   download: "download",
   upload: "upload",
   swap_vert: "swap_vert",
+  tune: "tune",
 };
 
 export function AeroIcon(props: { name: AeroIconName; size?: number }) {

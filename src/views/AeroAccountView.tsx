@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useI18n } from "../app/i18n";
 import type { AeroAccountSnapshot, DesktopHost } from "../app/desktop";
 import { AeroIcon } from "../components/AeroIcon";
-import { Button, Dialog } from "../components/ui";
 import aeroAvatar from "../assets/aero-avatar.png";
 import styles from "./AeroPages.module.css";
 
@@ -11,15 +10,11 @@ export function AeroAccountView(props: {
   host: DesktopHost;
   account: AeroAccountSnapshot;
   onAccountUpdated?: (account: AeroAccountSnapshot) => void;
-  onLogout: () => Promise<void>;
 }) {
   const { t, language } = useI18n();
   const [account, setAccount] = useState(props.account);
   const [loading, setLoading] = useState(true);
   const [refreshError, setRefreshError] = useState("");
-  const [showLogout, setShowLogout] = useState(false);
-  const [logoutBusy, setLogoutBusy] = useState(false);
-  const [logoutError, setLogoutError] = useState("");
 
   useEffect(() => setAccount(props.account), [props.account]);
 
@@ -45,19 +40,6 @@ export function AeroAccountView(props: {
   const validUntil = plan === null || plan.expiresAt <= 0
     ? "--"
     : new Intl.DateTimeFormat(language, { dateStyle: "medium" }).format(new Date(plan.expiresAt * 1000));
-
-  async function logout() {
-    setLogoutBusy(true);
-    setLogoutError("");
-    try {
-      await props.onLogout();
-      setShowLogout(false);
-      setLogoutBusy(false);
-    } catch (error) {
-      setLogoutError(error instanceof Error ? error.message : String(error));
-      setLogoutBusy(false);
-    }
-  }
 
   return (
     <section className={styles.page}>
@@ -101,26 +83,7 @@ export function AeroAccountView(props: {
         </section>
 
         {refreshError && <div className={styles.accountError} role="status">{refreshError}</div>}
-        <button type="button" className={styles.logoutButton} onClick={() => setShowLogout(true)}>
-          <AeroIcon name="logout" size={18} />{t("Log Out")}
-        </button>
       </div>
-
-      {showLogout && (
-        <Dialog onClose={() => { if (!logoutBusy) setShowLogout(false); }}>
-          <h2>{t("Log Out")}</h2>
-          <div className="dialog-message">
-            <p>{t("Sign out of your AeroVPN account?")}</p>
-            {logoutError && <p role="alert">{logoutError}</p>}
-          </div>
-          <div className="row-actions dialog-actions">
-            <Button disabled={logoutBusy} onClick={() => setShowLogout(false)}>{t("Cancel")}</Button>
-            <Button variant="danger" disabled={logoutBusy} onClick={() => void logout()}>
-              {logoutBusy ? t("Sending...") : t("Log Out")}
-            </Button>
-          </div>
-        </Dialog>
-      )}
     </section>
   );
 }

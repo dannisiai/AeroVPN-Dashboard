@@ -299,7 +299,7 @@ export function AeroLoginView(props: {
         {notice && <div className={styles.successMessage} role="status">{notice}</div>}
 
         <Button variant="primary" type="submit" className={styles.submitButton} disabled={busy}>
-          {busy ? <><Spinner className={styles.buttonSpinner} />{t("Sending...")}</> : isSignUp ? t("Create Account") : t("Sign In")}
+          {busy ? <><Spinner className={styles.buttonSpinner} />{isSignUp ? t("Sending...") : t("Logging in...")}</> : isSignUp ? t("Create Account") : t("Sign In")}
         </Button>
       </form>
 

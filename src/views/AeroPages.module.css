@@ -395,6 +395,12 @@
 }
 .legal-dialog-content p { margin: 0 0 14px; }
 .legal-dialog-content p:last-child { margin-bottom: 0; }
+.legal-dialog-content h4 { margin: 18px 0 8px; color: #292622; font-size: 14px; }
+.legal-dialog-content h4:first-child { margin-top: 0; }
+.legal-dialog-content ul,
+.legal-dialog-content ol { margin: 0 0 14px; padding-left: 22px; }
+.legal-dialog-content li { margin: 0 0 8px; }
+.legal-dialog-content li:last-child { margin-bottom: 0; }
 
 .faq-body {
   flex: 1;

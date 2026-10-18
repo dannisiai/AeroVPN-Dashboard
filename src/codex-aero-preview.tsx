@@ -41,7 +41,7 @@ const demoAccount = { email: "demo@example.com", plan: null } satisfies AeroAcco
 const demoHost = {
   platform: "win32",
   managedMode: true,
-  appVersion: async () => "1.14.3",
+  appVersion: async () => "1.0.0",
   profiles: {
     list: async () => ({
       selectedId: null,
@@ -128,9 +128,9 @@ function Preview() {
       />
       <main className="preview-main">
         {page === "home" && <AeroHomeView host={demoHost} account={demoAccount} />}
-        {page === "account" && <AeroAccountView host={demoHost} account={demoAccount} onLogout={async () => {}} />}
+        {page === "account" && <AeroAccountView host={demoHost} account={demoAccount} />}
         {page === "more" && <AeroMoreView />}
-        {page === "settings" && <AeroSettingsView host={demoHost} />}
+        {page === "settings" && <AeroSettingsView host={demoHost} onLogout={async () => {}} />}
         {page === "faq" && <AeroFaqView />}
         {page === "profiles" && <section className="page"><header className="page-header"><h1>配置</h1></header><ProfileCard host={demoHost} /></section>}
       </main>

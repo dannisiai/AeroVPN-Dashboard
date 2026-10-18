@@ -5,6 +5,7 @@ import type {
   AeroAccountSnapshot,
   AeroConnectSessionSnapshot,
   AeroConnectionMode,
+  AeroConnectionOptions,
   AeroConnectionSnapshot,
   AeroRegionSnapshot,
 } from "../../../src/shared/ipc";
@@ -20,6 +21,7 @@ export type {
   AeroConnectSessionSnapshot,
   AeroConnectionMode,
   AeroConnectionSnapshot,
+  AeroRoutingMode,
   AeroRegionSnapshot,
 } from "../../../src/shared/ipc";
 
@@ -234,6 +236,7 @@ export interface DesktopHost {
       regionId: string,
       cityId: string,
       mode?: AeroConnectionMode,
+      options?: AeroConnectionOptions,
     ): Promise<AeroConnectionSnapshot>;
     disconnect(): Promise<void>;
     listConnectSessions(): Promise<AeroConnectSessionSnapshot[]>;

@@ -223,6 +223,9 @@
   border-radius: 50%;
 }
 
+.latency-dot-warning { background: #eab308; }
+.latency-dot-unavailable { background: #a8a29e; }
+
 .plan-card {
   display: flex;
   align-items: center;
@@ -528,7 +531,7 @@
 }
 
 .city-latency-fast { color: #43866f; }
-.city-latency-slower { color: #a8742f; }
+.city-latency-slower { color: #eab308; }
 .city-latency-unavailable { color: #a8a29e; }
 
 .city-selected-check,

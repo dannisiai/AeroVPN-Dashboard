@@ -1,4 +1,4 @@
-import { Children, cloneElement, createContext, isValidElement, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type KeyboardEvent, type MouseEventHandler, type PointerEventHandler, type ReactElement, type ReactNode, type RefObject } from "react";
+import { Children, cloneElement, createContext, Fragment, isValidElement, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type KeyboardEvent, type MouseEventHandler, type PointerEventHandler, type ReactElement, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { encode as encodeQR } from "uqr";
 
@@ -484,7 +484,7 @@ export function ThemeMenu(props: {
 
 export function Select<T extends string | number>(props: {
   id?: string;
-  options: { value: T; label: ReactNode }[];
+  options: { value: T; label: ReactNode; description?: ReactNode; separatorBefore?: boolean }[];
   value: T;
   onChange: (value: T) => void;
   disabled?: boolean;
@@ -560,19 +560,26 @@ export function Select<T extends string | number>(props: {
           ref={listRef}
         >
           {props.options.map((option) => (
-            <button
-              key={String(option.value)}
-              type="button"
-              role="option"
-              aria-selected={option.value === props.value}
-              className="menu-item"
-              onClick={() => select(option.value)}
-            >
-              <span className="menu-check">
-                {option.value === props.value && <Icon name="check" size={13} />}
-              </span>
-              {option.label}
-            </button>
+            <Fragment key={String(option.value)}>
+              {option.separatorBefore && <div className="menu-divider" role="separator" />}
+              <button
+                type="button"
+                role="option"
+                aria-selected={option.value === props.value}
+                className={option.description ? "menu-item select-option" : "menu-item"}
+                onClick={() => select(option.value)}
+              >
+                <span className="menu-check">
+                  {option.value === props.value && <Icon name="check" size={13} />}
+                </span>
+                {option.description ? (
+                  <span className="select-option-copy">
+                    <span>{option.label}</span>
+                    <small>{option.description}</small>
+                  </span>
+                ) : option.label}
+              </button>
+            </Fragment>
           ))}
         </div>
       )}

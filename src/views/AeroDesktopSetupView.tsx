@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import type { AeroAccountSnapshot, AeroRegionSnapshot, DaemonConnectionState, DesktopHost } from "../app/desktop";
 import { navigate } from "../app/context";
+import { displayedLatencyMs, useUsNodeLatency } from "../app/displayedLatency";
 import { useI18n } from "../app/i18n";
 import { nodeNumberForCity } from "../app/regionNodes";
 import { AeroIcon } from "../components/AeroIcon";
@@ -26,6 +27,7 @@ export function AeroDesktopSetupView(props: {
   onLogout: () => Promise<void>;
 }) {
   const { t } = useI18n();
+  const usNodeLatency = useUsNodeLatency();
   const [repairing, setRepairing] = useState(false);
   const [repairError, setRepairError] = useState<string | null>(null);
   const [confirmingTakeOver, setConfirmingTakeOver] = useState(false);
@@ -44,6 +46,9 @@ export function AeroDesktopSetupView(props: {
 
   const setupRegion = regions.find((region) => region.recommended) ?? regions[0] ?? null;
   const setupCity = setupRegion?.cities[0] ?? null;
+  const setupLatency = setupRegion !== null && setupCity !== null
+    ? displayedLatencyMs(setupRegion, setupCity, usNodeLatency)
+    : null;
   const setupNodeNumber = nodeNumberForCity(regions, setupRegion?.id ?? null, setupCity?.id ?? null);
   const plan = props.account.plan;
   const planActive = plan?.status === "active" && plan.expiresAt > Math.floor(Date.now() / 1000);
@@ -109,7 +114,7 @@ export function AeroDesktopSetupView(props: {
           <span className={homeStyles.flagAvatar} aria-hidden="true">{setupRegion?.flagEmoji ?? "🌐"}</span>
           <span className={homeStyles.locationDetails}>
             <span className={homeStyles.locationTitle}><strong>{setupCity ? t("Node {number}", { number: setupNodeNumber ?? 1 }) : t("Choose a region")}</strong><span>{setupRegion?.name ?? t("Loading...")}</span></span>
-            <span className={homeStyles.latency}><span className={homeStyles.latencyDot} />{setupCity ? `${setupCity.latencyMs} ms` : "—"}</span>
+            <span className={homeStyles.latency}><span className={`${homeStyles.latencyDot} ${setupLatency === null || setupLatency <= 0 ? homeStyles.latencyDotUnavailable : setupLatency >= 100 ? homeStyles.latencyDotWarning : ""}`} />{setupLatency !== null ? `${setupLatency} ms` : "—"}</span>
           </span>
         </div>
         <section className={homeStyles.planCard} aria-label={t("Plan status")}>
@@ -146,10 +151,10 @@ export function AeroDesktopSetupView(props: {
 
   let content;
   if (page === "overview") content = renderHome();
-  else if (page === "account") content = <AeroAccountView host={props.host} account={props.account} onAccountUpdated={props.onAccountUpdated} onLogout={props.onLogout} />;
+  else if (page === "account") content = <AeroAccountView host={props.host} account={props.account} onAccountUpdated={props.onAccountUpdated} />;
   else if (page === "faq") content = <AeroFaqView />;
   else if (page === "tools") content = <AeroMoreView />;
-  else if (page === "settings") content = <AeroSettingsView host={props.host} />;
+  else if (page === "settings") content = <AeroSettingsView host={props.host} onLogout={props.onLogout} />;
   else if (page === "profiles") {
     content = <section className={pageStyles.page}><header className={pageStyles.pageHeader}><h1>{t("Profiles")}</h1></header><div className={styles.profileBody}><ProfileCard host={props.host} /></div></section>;
   } else {

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { navigate, useApi } from "../app/context";
-import { loadAeroConnectionMode } from "../app/connectionMode";
+import { loadAeroConnectionPreferences } from "../app/connectionMode";
+import { displayedLatencyMs, useUsNodeLatency } from "../app/displayedLatency";
 import type { AeroAccountSnapshot, AeroConnectionSnapshot, AeroRegionSnapshot, DesktopHost } from "../app/desktop";
 import { useI18n } from "../app/i18n";
 import { nodeNumberForCity } from "../app/regionNodes";
@@ -23,6 +24,7 @@ export function AeroHomeView(props: {
 }) {
   const api = useApi();
   const { t } = useI18n();
+  const usNodeLatency = useUsNodeLatency();
   const serviceStatus = useStream(api.serviceStatus);
   const [regions, setRegions] = useState<AeroRegionSnapshot[]>([]);
   const [connection, setConnection] = useState<AeroConnectionSnapshot | null>(null);
@@ -117,7 +119,9 @@ export function AeroHomeView(props: {
       : t("Choose a region");
   const displayCountry = connection?.countryName ?? selectedRegion?.name ?? t("Server list unavailable");
   const displayFlag = selectedRegion?.flagEmoji ?? "🌐";
-  const latency = selectedCity?.latencyMs ?? null;
+  const latency = selectedRegion !== null && selectedCity !== null
+    ? displayedLatencyMs(selectedRegion, selectedCity, usNodeLatency)
+    : null;
   const openRegionPicker = () => {
     setExpandedRegionIds(regionId === null ? new Set() : new Set([regionId]));
     setRegionPickerOpen(true);
@@ -144,10 +148,16 @@ export function AeroHomeView(props: {
         if (selectedRegion === null || selectedCity === null) {
           throw new Error(t("Choose a region before connecting."));
         }
+        const connectionPreferences = loadAeroConnectionPreferences();
         const nextConnection = await props.host.auth.connect(
           selectedRegion.id,
           selectedCity.id,
-          loadAeroConnectionMode(),
+          connectionPreferences.mode,
+          {
+            localPort: connectionPreferences.localPort,
+            routingMode: connectionPreferences.routingMode === "global" ? "global" : "auto",
+            secureDns: connectionPreferences.secureDns,
+          },
         );
         setConnection(nextConnection);
         setRegionId(nextConnection.regionId);
@@ -223,7 +233,7 @@ export function AeroHomeView(props: {
               <span>{displayCountry}</span>
             </span>
             <span className={styles.latency}>
-              <span className={styles.latencyDot} />
+              <span className={`${styles.latencyDot} ${latency === null || latency <= 0 ? styles.latencyDotUnavailable : latency >= 100 ? styles.latencyDotWarning : ""}`} />
               {latency === null ? "—" : `${latency} ms`}
             </span>
           </span>
@@ -306,9 +316,10 @@ export function AeroHomeView(props: {
                     <div className={styles.cityList}>
                       {region.cities.map((city) => {
                         const selected = region.id === regionId && city.id === cityId;
-                        const latencyTone = city.latencyMs <= 0
+                        const displayLatency = displayedLatencyMs(region, city, usNodeLatency);
+                        const latencyTone = displayLatency <= 0
                           ? styles.cityLatencyUnavailable
-                          : city.latencyMs < 60
+                          : displayLatency < 100
                             ? styles.cityLatencyFast
                             : styles.cityLatencySlower;
                         return (
@@ -325,7 +336,7 @@ export function AeroHomeView(props: {
                             </span>
                             <span className={`${styles.cityLatency} ${latencyTone}`}>
                               <i aria-hidden="true" />
-                              {city.latencyMs > 0 ? `${city.latencyMs} ms` : "—"}
+                              {displayLatency > 0 ? `${displayLatency} ms` : "—"}
                             </span>
                             {selected
                               ? <span className={styles.citySelectedCheck}><Icon name="check" size={12} /></span>
