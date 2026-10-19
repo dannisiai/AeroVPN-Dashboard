@@ -340,7 +340,7 @@ export function AeroSettingsView(props: { host: DesktopHost; onLogout?: () => Pr
                 <LegalContent sections={AEROVPN_TERMS} />
               </div>
               <div className="row-actions dialog-actions">
-                <Button onClick={() => setDialog(null)}>{t("Got it")}</Button>
+                <Button variant="primary" onClick={() => setDialog(null)}>{t("Confirm")}</Button>
               </div>
             </>
           ) : (

@@ -60,7 +60,7 @@ export function AeroDesktopSetupView(props: {
     : plan.trafficGb <= 0
       ? t("Unlimited")
       : plan.trafficUsedGb === null
-        ? `${plan.trafficGb.toFixed(1)} GB`
+        ? "—"
         : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(1)} GB`;
 
   const runRepair = (repair: () => Promise<unknown>, onSuccess?: () => void) => {

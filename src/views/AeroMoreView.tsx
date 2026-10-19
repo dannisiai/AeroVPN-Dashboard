@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useI18n } from "../app/i18n";
 import { AeroIcon, type AeroIconName } from "../components/AeroIcon";
-import { Dialog } from "../components/ui";
+import { Button, Dialog } from "../components/ui";
 import styles from "./AeroPages.module.css";
 
 type MoreAction = "agent" | "website" | "orders" | "support" | "channel" | "tickets";
@@ -57,7 +57,7 @@ export function AeroMoreView() {
         <Dialog onClose={() => setDialog(null)}>
           <h2 className={styles.dialogHeading}><span style={{ color: details.color }}><AeroIcon name={details.icon} size={22} /></span>{details.title}</h2>
           <div className="dialog-message"><p>{details.body}</p></div>
-          <div className="row-actions dialog-actions"><button type="button" className="button" onClick={() => setDialog(null)}>{t("Ok")}</button></div>
+          <div className="row-actions dialog-actions"><Button variant="primary" onClick={() => setDialog(null)}>{t("Confirm")}</Button></div>
         </Dialog>
       )}
     </section>
