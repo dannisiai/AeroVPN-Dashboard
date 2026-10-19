@@ -84,7 +84,7 @@ export function AeroAccountView(props: {
           {plan?.trafficGb !== null && plan?.trafficGb !== undefined && plan.trafficGb > 0 && (
             <div className={styles.subscriptionRow}>
               <span>{t("Remaining Data")}</span>
-              <strong>{plan.trafficUsedGb === null ? "—" : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(3)} GB`}</strong>
+              <strong>{plan.trafficUsedGb === null ? "—" : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(0)} GB`}</strong>
             </div>
           )}
           {!active && <div className={styles.noPlanHint}>{t("No active subscription. Please purchase a plan before connecting.")}</div>}

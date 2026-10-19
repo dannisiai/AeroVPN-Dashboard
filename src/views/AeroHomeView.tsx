@@ -123,7 +123,7 @@ export function AeroHomeView(props: {
       ? t("Unlimited")
       : plan.trafficUsedGb === null
         ? "—"
-        : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(3)} GB`;
+        : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(0)} GB`;
 
   const selectedNodeNumber = nodeNumberForCity(regions, selectedRegion?.id ?? null, selectedCity?.id ?? null);
   const displayCity = selectedCity !== null
