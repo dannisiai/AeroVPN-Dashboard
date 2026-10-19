@@ -16,6 +16,7 @@ import styles from "./AeroHomeView.module.css";
 
 const SELECTED_REGION_KEY = "aerovpn.selected-region";
 const SELECTED_CITY_KEY = "aerovpn.selected-city";
+const ACCOUNT_REFRESH_INTERVAL_MS = 60_000;
 
 export function AeroHomeView(props: {
   host: DesktopHost;
@@ -74,12 +75,25 @@ export function AeroHomeView(props: {
 
   useEffect(() => {
     let disposed = false;
-    void props.host.auth.refreshAccount()
-      .then((account) => {
+    let refreshing = false;
+    const refreshAccount = async () => {
+      if (disposed || refreshing) return;
+      refreshing = true;
+      try {
+        const account = await props.host.auth.refreshAccount();
         if (!disposed) props.onAccountUpdated?.(account);
-      })
-      .catch(() => {});
-    return () => { disposed = true; };
+      } catch {
+        // Keep the last known account snapshot if a periodic refresh fails.
+      } finally {
+        refreshing = false;
+      }
+    };
+    void refreshAccount();
+    const timer = window.setInterval(() => void refreshAccount(), ACCOUNT_REFRESH_INTERVAL_MS);
+    return () => {
+      disposed = true;
+      window.clearInterval(timer);
+    };
   }, [props.host, props.onAccountUpdated]);
 
   const selectedRegion = regions.find((region) => region.id === regionId) ?? null;
@@ -109,7 +123,7 @@ export function AeroHomeView(props: {
       ? t("Unlimited")
       : plan.trafficUsedGb === null
         ? "—"
-        : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(1)} GB`;
+        : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(3)} GB`;
 
   const selectedNodeNumber = nodeNumberForCity(regions, selectedRegion?.id ?? null, selectedCity?.id ?? null);
   const displayCity = selectedCity !== null

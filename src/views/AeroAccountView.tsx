@@ -6,6 +6,8 @@ import { AeroIcon } from "../components/AeroIcon";
 import aeroAvatar from "../assets/aero-avatar.png";
 import styles from "./AeroPages.module.css";
 
+const ACCOUNT_REFRESH_INTERVAL_MS = 60_000;
+
 export function AeroAccountView(props: {
   host: DesktopHost;
   account: AeroAccountSnapshot;
@@ -18,21 +20,27 @@ export function AeroAccountView(props: {
 
   useEffect(() => setAccount(props.account), [props.account]);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setRefreshError("");
+  const refresh = useCallback(async (showStatus = true) => {
+    if (showStatus) {
+      setLoading(true);
+      setRefreshError("");
+    }
     try {
       const updatedAccount = await props.host.auth.refreshAccount();
       setAccount(updatedAccount);
       props.onAccountUpdated?.(updatedAccount);
     } catch (error) {
-      setRefreshError(error instanceof Error ? error.message : String(error));
+      if (showStatus) setRefreshError(error instanceof Error ? error.message : String(error));
     } finally {
-      setLoading(false);
+      if (showStatus) setLoading(false);
     }
   }, [props.host, props.onAccountUpdated]);
 
   useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    const timer = window.setInterval(() => void refresh(false), ACCOUNT_REFRESH_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [refresh]);
 
   const plan = account.plan;
   const active = plan?.status === "active" && plan.expiresAt > Math.floor(Date.now() / 1000);
@@ -76,7 +84,7 @@ export function AeroAccountView(props: {
           {plan?.trafficGb !== null && plan?.trafficGb !== undefined && plan.trafficGb > 0 && (
             <div className={styles.subscriptionRow}>
               <span>{t("Remaining Data")}</span>
-              <strong>{plan.trafficUsedGb === null ? "—" : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(1)} GB`}</strong>
+              <strong>{plan.trafficUsedGb === null ? "—" : `${Math.max(0, plan.trafficGb - plan.trafficUsedGb).toFixed(3)} GB`}</strong>
             </div>
           )}
           {!active && <div className={styles.noPlanHint}>{t("No active subscription. Please purchase a plan before connecting.")}</div>}
